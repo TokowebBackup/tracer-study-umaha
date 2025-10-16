@@ -136,6 +136,9 @@
         <a href="<?= base_url('admin/kuesionerfields') ?>" class="<?= uri_string() == 'admin/kuesionerfields' ? 'active' : '' ?>"><i class="bi bi-gear"></i> Setting Form</a>
         <a href="<?= base_url('admin/alumni') ?>" class="<?= uri_string() == 'admin/alumni' ? 'active' : '' ?>"><i class="bi bi-person-lines-fill me-2"></i>Data Alumni</a>
         <a href="<?= base_url('admin/tracer') ?>" class="<?= uri_string() == 'admin/tracer' ? 'active' : '' ?>"><i class="bi bi-clipboard-data me-2"></i>Data Tracer Study</a>
+        <a href="<?= base_url('admin/kuesioner-pengguna') ?>" class="<?= uri_string() == 'admin/kuesioner-pengguna' ? 'active' : '' ?>">
+            <i class="bi bi-briefcase me-2"></i> Kuesioner Pengguna
+        </a>
         <a href="<?= base_url('admin/pengguna') ?>" class="<?= uri_string() == 'admin/pengguna' ? 'active' : '' ?>"><i class="bi bi-person-workspace me-2"></i>Pengguna</a>
         <a href="<?= base_url('admin/periode') ?>" class="<?= uri_string() == 'admin/periode' ? 'active' : '' ?>"><i class="bi bi-calendar-range me-2"></i>Periode Tracer</a>
         <a href="<?= base_url('admin/panduan') ?>" class="<?= uri_string() == 'admin/panduan' ? 'active' : '' ?>"><i class="bi bi-file-earmark-arrow-down me-2"></i>Panduan Tracer</a>

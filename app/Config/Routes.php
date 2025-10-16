@@ -81,6 +81,13 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('kuesionerfields/edit/(:num)', 'Admin\KuesionerFields::edit/$1');
     $routes->post('kuesionerfields/update/(:num)', 'Admin\KuesionerFields::update/$1');
     $routes->get('kuesionerfields/delete/(:num)', 'Admin\KuesionerFields::delete/$1');
+
+    // Kuesioner Pengguna
+    $routes->get('kuesioner-pengguna', 'Admin\KuesionerPengguna::index');
+    $routes->get('kuesioner-pengguna/detail/(:num)', 'Admin\KuesionerPengguna::detail/$1');
+    $routes->get('kuesioner-pengguna/delete/(:num)', 'Admin\KuesionerPengguna::delete/$1');
+    $routes->get('kuesioner-pengguna/export/all', 'Admin\KuesionerPengguna::exportAll');
+    $routes->get('kuesioner-pengguna/export/(:num)', 'Admin\KuesionerPengguna::exportSingle/$1');
 });
 
 
