@@ -4,7 +4,7 @@
 <div class="container mt-4 mb-5">
     <h3 class="mb-3">Edit Kuesioner Tracer Study</h3>
 
-    <form action="<?= base_url('tracer/update/' . ($tracer['id'] ?? '')) ?>" method="post">
+    <form action="<?= base_url('alumni/tracer/update') ?>" method="post">
         <input type="hidden" name="tahun_pengisian" value="<?= esc($tracer['tahun_pengisian'] ?? date('Y')) ?>">
 
         <!-- STEP 1 -->
@@ -54,7 +54,7 @@
                                         }
                                     } elseif (is_array($options)) {
                                         foreach ($options as $opt) {
-                                            $selected = ($opt == $value) ? 'selected' : '';
+                                            $selected = (strcasecmp(trim($opt), trim($value)) === 0) ? 'selected' : '';
                                             echo "<option value='" . esc($opt) . "' {$selected}>" . esc($opt) . "</option>";
                                         }
                                     }
@@ -120,7 +120,7 @@
                                         }
                                     } elseif (is_array($options)) {
                                         foreach ($options as $opt) {
-                                            $selected = ($opt == $value) ? 'selected' : '';
+                                            $selected = (strcasecmp(trim($opt), trim($value)) === 0) ? 'selected' : '';
                                             echo "<option value='" . esc($opt) . "' {$selected}>" . esc($opt) . "</option>";
                                         }
                                     }

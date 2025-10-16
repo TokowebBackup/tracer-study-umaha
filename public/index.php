@@ -9,6 +9,8 @@ use Config\Paths;
  *---------------------------------------------------------------
  */
 
+// $start_time = microtime(true);
+
 $minPhpVersion = '8.1'; // If you update this, don't forget to update `spark`.
 if (version_compare(PHP_VERSION, $minPhpVersion, '<')) {
     $message = sprintf(
@@ -55,5 +57,7 @@ $paths = new Paths();
 
 // LOAD THE FRAMEWORK BOOTSTRAP FILE
 require $paths->systemDirectory . '/Boot.php';
+
+// echo '<!-- Load time: ' . round((microtime(true) - $start_time), 3) . ' s -->';
 
 exit(Boot::bootWeb($paths));

@@ -68,23 +68,43 @@ class Tracer extends BaseController
 
         $data['select_options'] = $select_options;
 
+        if ($data['tracer']) {
+            foreach ($data['tracer'] as $key => $val) {
+                if (is_string($val)) {
+                    $data['tracer'][$key] = trim($val);
+                }
+            }
+        }
+
+
         return view('alumni/tracer_edit', $data);
     }
 
-    public function update($id)
+    public function update($id = null)
     {
         $post = $this->request->getPost();
         $alumniId = session()->get('alumni_id');
 
         $tracerModel = new TracerModel();
         $allowedFields = $tracerModel->allowedFields;
+
+        // Tambahkan alumni_id ke data
         $post['alumni_id'] = $alumniId;
 
-        // Filter data input
+        // Filter input agar sesuai kolom tabel
         $dataToSave = array_intersect_key($post, array_flip($allowedFields));
 
-        $tracerModel->update($id, $dataToSave);
+        // Cek apakah data tracer sudah ada
+        $existing = $tracerModel->where('alumni_id', $alumniId)->first();
 
-        return redirect()->to('/dashboard')->with('success', 'Data tracer berhasil diperbarui.');
+        if ($existing) {
+            // Update berdasarkan alumni_id
+            $tracerModel->where('alumni_id', $alumniId)->set($dataToSave)->update();
+        } else {
+            // Insert baru kalau belum ada
+            $tracerModel->insert($dataToSave);
+        }
+
+        return redirect()->to('/alumni/dashboard')->with('success', 'Data tracer berhasil diperbarui.');
     }
 }

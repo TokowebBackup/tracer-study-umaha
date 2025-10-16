@@ -36,6 +36,10 @@ $routes->get('admin/logout', 'Admin\Auth::logout');
 $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     // Dashboard
     $routes->get('dashboard', 'Admin\Dashboard::index');
+    // Setting Profil Admin
+    $routes->get('profile', 'Admin\Profile::index');
+    $routes->post('profile/update', 'Admin\Profile::update');
+
 
     // Alumni
     $routes->get('alumni', 'Admin\Alumni::index');
@@ -74,6 +78,9 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('kuesionerfields', 'Admin\KuesionerFields::index');
     $routes->get('kuesionerfields/create', 'Admin\KuesionerFields::create');
     $routes->post('kuesionerfields/store', 'Admin\KuesionerFields::store');
+    $routes->get('kuesionerfields/edit/(:num)', 'Admin\KuesionerFields::edit/$1');
+    $routes->post('kuesionerfields/update/(:num)', 'Admin\KuesionerFields::update/$1');
+    $routes->get('kuesionerfields/delete/(:num)', 'Admin\KuesionerFields::delete/$1');
 });
 
 
@@ -81,3 +88,6 @@ $routes->get('alumni/dashboard', 'Alumni\Dashboard::index', ['filter' => 'auth']
 // Fitur edit tracer study oleh alumni
 $routes->get('alumni/tracer/edit', 'Alumni\Tracer::edit', ['filter' => 'auth']);
 $routes->post('alumni/tracer/update', 'Alumni\Tracer::update', ['filter' => 'auth']);
+
+
+$routes->get('test', 'Test::index');

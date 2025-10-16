@@ -85,6 +85,11 @@
             font-size: 1.5rem;
         }
 
+        .navbar .dropdown-menu {
+            right: 0;
+            left: auto;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 left: -240px;
@@ -112,7 +117,6 @@
             white-space: nowrap;
         }
 
-        /* Sedikit jarak antar tombol */
         #tabelAlumni td.options-cell .btn {
             margin-bottom: 3px;
         }
@@ -128,24 +132,45 @@
             Tracer UMAHA
         </div>
         <a href="<?= base_url('admin/dashboard') ?>" class="<?= uri_string() == 'admin/dashboard' ? 'active' : '' ?>"><i class="bi bi-speedometer2 me-2"></i>Dashboard</a>
-        <a href="<?= base_url('admin/landing') ?>" class="<?= uri_string() == 'admin/periode' ? 'active' : '' ?>"><i class="bi bi-sliders"></i> Setting Page</a>
-        <a href="<?= base_url('admin/kuesionerfields') ?>" class="<?= uri_string() == 'admin/periode' ? 'active' : '' ?>"><i class="bi bi-gear"></i> Setting Form</a>
+        <a href="<?= base_url('admin/landing') ?>" class="<?= uri_string() == 'admin/landing' ? 'active' : '' ?>"><i class="bi bi-sliders"></i> Setting Page</a>
+        <a href="<?= base_url('admin/kuesionerfields') ?>" class="<?= uri_string() == 'admin/kuesionerfields' ? 'active' : '' ?>"><i class="bi bi-gear"></i> Setting Form</a>
         <a href="<?= base_url('admin/alumni') ?>" class="<?= uri_string() == 'admin/alumni' ? 'active' : '' ?>"><i class="bi bi-person-lines-fill me-2"></i>Data Alumni</a>
-        <a href="<?= base_url('admin/tracer') ?>" class="<?= uri_string() == 'admin/tracer' ? 'active' : '' ?>">
-            <i class="bi bi-clipboard-data me-2"></i> Data Tracer Study
-        </a>
+        <a href="<?= base_url('admin/tracer') ?>" class="<?= uri_string() == 'admin/tracer' ? 'active' : '' ?>"><i class="bi bi-clipboard-data me-2"></i>Data Tracer Study</a>
         <a href="<?= base_url('admin/pengguna') ?>" class="<?= uri_string() == 'admin/pengguna' ? 'active' : '' ?>"><i class="bi bi-person-workspace me-2"></i>Pengguna</a>
         <a href="<?= base_url('admin/periode') ?>" class="<?= uri_string() == 'admin/periode' ? 'active' : '' ?>"><i class="bi bi-calendar-range me-2"></i>Periode Tracer</a>
-        <a href="<?= base_url('admin/panduan') ?>" class="<?= uri_string() == 'admin/panduan' ? 'active' : '' ?>">
-            <i class="bi bi-file-earmark-arrow-down me-2"></i>Panduan Tracer
-        </a>
-        <a href="<?= base_url('admin/logout') ?>"><i class="bi bi-box-arrow-right me-2"></i>Logout</a>
+        <a href="<?= base_url('admin/panduan') ?>" class="<?= uri_string() == 'admin/panduan' ? 'active' : '' ?>"><i class="bi bi-file-earmark-arrow-down me-2"></i>Panduan Tracer</a>
     </div>
 
     <!-- NAVBAR TOP -->
-    <nav class="navbar navbar-dark bg-dark px-3" id="navbar">
-        <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar"><i class="bi bi-list"></i></button>
-        <span class="navbar-text text-white ms-3">Admin Panel</span>
+    <nav class="navbar navbar-dark bg-dark px-3 d-flex justify-content-between align-items-center" id="navbar">
+        <div class="d-flex align-items-center">
+            <button class="sidebar-toggle" onclick="toggleSidebar()" title="Toggle Sidebar">
+                <i class="bi bi-list"></i>
+            </button>
+            <span class="navbar-text text-white ms-3">Admin Panel</span>
+        </div>
+
+        <!-- DROPDOWN PROFIL -->
+        <div class="dropdown">
+            <a class="text-white dropdown-toggle text-decoration-none" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-person-circle me-2"></i>Admin
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                    <a class="dropdown-item <?= uri_string() == 'admin/profile' ? 'active' : '' ?>" href="<?= base_url('admin/profile') ?>">
+                        <i class="bi bi-person-lines-fill me-2"></i>Profil Admin
+                    </a>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <li>
+                    <a class="dropdown-item text-danger" href="<?= base_url('admin/logout') ?>">
+                        <i class="bi bi-box-arrow-right me-2"></i>Logout
+                    </a>
+                </li>
+            </ul>
+        </div>
     </nav>
 
     <!-- CONTENT -->
@@ -153,7 +178,9 @@
         <?= $this->renderSection('content') ?>
     </div>
 
+    <!-- JS -->
     <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
@@ -167,11 +194,8 @@
             content.classList.toggle('full');
             navbar.classList.toggle('full');
         }
-    </script>
 
-    <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // Delegasi klik tombol hapus
             $(document).on('click', '.btn-delete', function(e) {
                 e.preventDefault();
                 const url = $(this).attr('href');

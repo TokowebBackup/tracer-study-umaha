@@ -62,7 +62,7 @@
         </select>
     </div>
     <div class="mb-3">
-        <label for="order" class="form-label">Urutan Tampil</label>
+        <label for="order" class="form-label">Urutan Tampil (Posisi Kolom)</label>
         <input type="number" id="order" name="order" value="<?= old('order') ?? 0 ?>" class="form-control" required>
     </div>
 

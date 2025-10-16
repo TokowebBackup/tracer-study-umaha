@@ -265,18 +265,28 @@
                     $bg = $item['background'] ?: "none";
                     $style = " --bg-image: {$bg};";
                     ?>
+                    <?php
+                    $isLoggedIn = session()->get('email');
+                    ?>
+
                     <div class="col-12 col-md-6 mb-3">
                         <?php if (!empty($item['modal'])): ?>
-                            <a href="#" class="menu-card card p-4 h-100"
-                                data-bs-toggle="modal" data-bs-target="#loginModal" style="<?= $style ?>">
-                            <?php else: ?>
-                                <a href="<?= $item['link'] ?>" class="menu-card card p-4 h-100" style="<?= $style ?>">
-                                <?php endif ?>
-                                <i class="bi <?= $item['icon'] ?> display-6 mb-2 text-success"></i>
-                                <strong><?= $item['text'] ?></strong>
-                                </a>
+                            <?php if ($isLoggedIn): ?>
+                                <a href="<?= base_url('alumni/dashboard') ?>" class="menu-card card p-4 h-100" style="<?= $style ?>">
+                                <?php else: ?>
+                                    <a href="#" class="menu-card card p-4 h-100" data-bs-toggle="modal" data-bs-target="#loginModal" style="<?= $style ?>">
+                                    <?php endif; ?>
+                                <?php else: ?>
+                                    <a href="<?= $item['link'] ?>" class="menu-card card p-4 h-100" style="<?= $style ?>">
+                                    <?php endif; ?>
 
+                                    <div class="d-flex flex-column align-items-center justify-content-center h-100">
+                                        <i class="<?= esc($item['icon']) ?>"></i>
+                                        <strong><?= esc($item['text']) ?></strong>
+                                    </div>
+                                    </a>
                     </div>
+
                 <?php endforeach ?>
             </div>
 

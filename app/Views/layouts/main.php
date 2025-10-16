@@ -198,7 +198,7 @@
         <div class="modal-dialog">
             <form id="loginForm" class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">Halaman Login</h5>
+                    <h5 class="modal-title">Halaman Login Alumni</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
@@ -212,24 +212,23 @@
 
                     <div id="loginError" class="text-danger mt-2 small"></div>
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer mb-3">
                     <button id="loginButton" class="btn btn-success w-100" type="submit">
                         <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true" id="loginSpinner"></span>
                         <span id="loginText">MASUK</span>
                     </button>
+
+                    <a href="#" onclick="openGooglePopup()" class="btn btn-light w-100 h-80 border d-flex align-items-center justify-content-center gap-2 shadow-sm mt-2 mb-5" style="font-weight: 600; font-size: 1rem;">
+                        <!-- Google SVG Icon -->
+                        <svg width="20" height="20" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 3px;">
+                            <path fill="#4285F4" d="M533.5 278.4c0-17.9-1.6-35.1-4.7-51.9H272v98.3h146.9c-6.3 33.6-25.3 62.1-54 81.3v67h87.3c51.1-47 80.3-116.4 80.3-194.7z" />
+                            <path fill="#34A853" d="M272 544.3c72.6 0 133.6-24 178.1-65.3l-87.3-67c-24.1 16.1-54.8 25.7-90.8 25.7-69.8 0-129-47.2-150.1-110.3h-89.1v69.3c44.5 87.8 136.5 147.9 239.2 147.9z" />
+                            <path fill="#FBBC05" d="M121.9 322.4c-10.5-31.3-10.5-65.5 0-96.8v-69.3h-89.1c-39.5 77.5-39.5 169.8 0 247.3l89.1-69.3z" />
+                            <path fill="#EA4335" d="M272 213.1c39.5 0 75 13.6 103.1 40.2l77.4-77.4c-47-43.8-107.9-70.6-180.5-70.6-102.7 0-194.7 60.1-239.2 147.9l89.1 69.3c21.1-63.1 80.3-110.3 150.1-110.3z" />
+                        </svg>
+                        Masuk dengan Google
+                    </a>
                 </div>
-
-
-                <a href="#" onclick="openGooglePopup()" class="btn btn-light w-100 border d-flex align-items-center justify-content-center gap-2 shadow-sm mt-2 mb-5" style="font-weight: 600; font-size: 1rem;">
-                    <!-- Google SVG Icon -->
-                    <svg width="20" height="20" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 3px;">
-                        <path fill="#4285F4" d="M533.5 278.4c0-17.9-1.6-35.1-4.7-51.9H272v98.3h146.9c-6.3 33.6-25.3 62.1-54 81.3v67h87.3c51.1-47 80.3-116.4 80.3-194.7z" />
-                        <path fill="#34A853" d="M272 544.3c72.6 0 133.6-24 178.1-65.3l-87.3-67c-24.1 16.1-54.8 25.7-90.8 25.7-69.8 0-129-47.2-150.1-110.3h-89.1v69.3c44.5 87.8 136.5 147.9 239.2 147.9z" />
-                        <path fill="#FBBC05" d="M121.9 322.4c-10.5-31.3-10.5-65.5 0-96.8v-69.3h-89.1c-39.5 77.5-39.5 169.8 0 247.3l89.1-69.3z" />
-                        <path fill="#EA4335" d="M272 213.1c39.5 0 75 13.6 103.1 40.2l77.4-77.4c-47-43.8-107.9-70.6-180.5-70.6-102.7 0-194.7 60.1-239.2 147.9l89.1 69.3c21.1-63.1 80.3-110.3 150.1-110.3z" />
-                    </svg>
-                    Masuk dengan Google
-                </a>
 
             </form>
         </div>
