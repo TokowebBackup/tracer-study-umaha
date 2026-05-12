@@ -41,18 +41,44 @@ class Tracer extends BaseController
     // ==============================
     public function detail($id)
     {
-        $data['tracer'] = $this->tracerModel
+        $tracer = $this->tracerModel
             ->select('tracer_study.*, alumni.nama, alumni.nim, alumni.email, prodi.nama_prodi, prodi.jenjang')
             ->join('alumni', 'alumni.id = tracer_study.alumni_id', 'left')
             ->join('prodi', 'prodi.kode_prodi = alumni.program_studi', 'left')
             ->where('tracer_study.id', $id)
             ->first();
 
-        if (!$data['tracer']) {
-            return redirect()->to(base_url('admin/tracer'))->with('error', 'Data tidak ditemukan.');
+        if (!$tracer) {
+
+            return redirect()
+                ->to(base_url('admin/tracer'))
+                ->with('error', 'Data tidak ditemukan.');
         }
 
-        return view('admin/tracer/detail', $data);
+        // =========================
+        // FIELD DINAMIS
+        // =========================
+
+        $fieldModel = new \App\Models\KuesionerFieldModel();
+
+        $allFields = $fieldModel
+            ->orderBy('step', 'ASC')
+            ->orderBy('order', 'ASC')
+            ->findAll();
+
+        $groupedFields = [];
+
+        foreach ($allFields as $field) {
+
+            $header = $field['header'] ?: 'Informasi Lain';
+
+            $groupedFields[$header][] = $field;
+        }
+
+        return view('admin/tracer/detail', [
+            'tracer' => $tracer,
+            'groupedFields' => $groupedFields,
+        ]);
     }
 
     // ==============================

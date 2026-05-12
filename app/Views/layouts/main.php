@@ -4,351 +4,1017 @@
 
 <head>
     <meta charset="UTF-8">
+
     <title>Tracer Study UMAHA</title>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="shortcut icon" href="<?= base_url('/assets/img/logo-umaha-192.png') ?>" type="image/x-icon">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <link rel="shortcut icon"
+        href="<?= base_url('/assets/img/logo-umaha-192.png') ?>"
+        type="image/x-icon">
+
+    <!-- FONT -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- BOOTSTRAP -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        rel="stylesheet">
+
+    <!-- ICON -->
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- SWEET ALERT -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <style>
-        body {
-            font-family: 'Nunito', sans-serif;
-            cursor: none;
-            background: #f7f7f7;
+        :root {
+
+            --primary:
+                #006633;
+
+            --secondary:
+                #009966;
+
+            --dark:
+                #041d14;
+
+            --light:
+                #f8fffc;
+
+            --white:
+                #ffffff;
+
+            --text:
+                #0f172a;
+
+            --muted:
+                #64748b;
+
+            --glass:
+                rgba(255, 255, 255, .12);
+
+            --border:
+                rgba(255, 255, 255, .18);
         }
 
+        * {
+
+            margin: 0;
+
+            padding: 0;
+
+            box-sizing: border-box;
+        }
+
+        html {
+
+            scroll-behavior: smooth;
+        }
+
+        body {
+
+            font-family: 'Plus Jakarta Sans', sans-serif;
+
+            background:
+                radial-gradient(circle at top left,
+                    rgba(0, 153, 102, .08),
+                    transparent 35%),
+
+                radial-gradient(circle at bottom right,
+                    rgba(0, 102, 51, .08),
+                    transparent 35%),
+
+                #f6fbf9;
+
+            color: var(--text);
+
+            overflow-x: hidden;
+
+            cursor: none;
+        }
+
+        /* CUSTOM CURSOR */
+        /* CUSTOM CURSOR */
         .custom-cursor {
+
             position: fixed;
+
             top: 0;
             left: 0;
-            width: 40px;
-            height: 40px;
-            border: 2px solid #2db598;
+
+            width: 42px;
+            height: 42px;
+
+            border:
+                2px solid rgba(0, 153, 102, .6);
+
             border-radius: 50%;
+
             pointer-events: none;
+
             transform: translate(-50%, -50%);
-            z-index: 9999;
+
+            z-index: 2147483647;
+
+            /* HAPUS backdrop-filter */
+            /* backdrop-filter: blur(4px); */
+
+            background:
+                rgba(255, 255, 255, .04);
+
+            mix-blend-mode: normal;
+
+            will-change:
+                transform,
+                top,
+                left;
+
+            backdrop-filter: blur(4px);
+
+            transition:
+                transform .08s linear,
+                width .2s ease,
+                height .2s ease,
+                background .2s ease;
+
+            /* FIX IMPORTANT */
+            isolation: isolate;
         }
 
         .custom-cursor::after {
+
             content: '';
+
             position: absolute;
+
             top: 50%;
             left: 50%;
+
             width: 8px;
             height: 8px;
-            background-color: #2db598;
+
+            background:
+                linear-gradient(135deg,
+                    var(--primary),
+                    var(--secondary));
+
             border-radius: 50%;
+
             transform: translate(-50%, -50%);
         }
 
-        .card-hover {
-            transition: transform 0.2s;
+        /* a:hover~.custom-cursor,
+        button:hover~.custom-cursor {
+
+            transform: translate(-50%, -50%) scale(1.2);
+        } */
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar {
+
+            width: 10px;
+
+            height: 10px;
         }
 
-        .card-hover:hover {
-            transform: scale(1.02);
+        ::-webkit-scrollbar-track {
+
+            background: #ecfdf5;
         }
 
-        /* Header sticky shrink */
+        ::-webkit-scrollbar-thumb {
+
+            background:
+                linear-gradient(180deg,
+                    var(--primary),
+                    var(--secondary));
+
+            border-radius: 20px;
+        }
+
+        /* STICKY HEADER */
         .sticky-header {
+
             position: sticky;
+
             top: 0;
-            z-index: 1000;
-            background: #fff;
-            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-            transition: all 0.3s ease;
+
+            z-index: 999;
+
+            backdrop-filter: blur(16px);
+
+            background:
+                rgba(255, 255, 255, .82);
+
+            border-bottom:
+                1px solid rgba(255, 255, 255, .2);
+
+            transition: .3s ease;
+
+            box-shadow:
+                0 10px 35px rgba(0, 0, 0, .03);
         }
 
-        /* Logo miring kiri */
-        .ribbon {
-            background-color: #2bbbad;
-            color: white;
-            font-weight: 600;
-            font-size: 20px;
-            padding: 55px 30px;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
-            display: inline-block;
-            white-space: nowrap;
-        }
-
+        /* FUTURISTIC RIBBON */
         .ribbon-wrapper {
-            min-width: 50%;
-            margin-left: -2rem;
-            height: auto;
-            /* biar fleksibel */
-        }
 
-        .ribbon-back {
-            position: absolute;
-            top: 10px;
-            left: 0px;
-            background-color: #2bbbad;
-            height: 100%;
-            width: 100%;
-            clip-path: polygon(0 10%, 100% 10%, 96% 100%, 0% 100%);
-            z-index: 0;
+            position: relative;
+
+            min-width: 50%;
+
+            margin-left: -2rem;
         }
 
         .ribbon-front {
+
+            position: relative;
+
             display: flex;
-            justify-content: flex-end;
+
             align-items: center;
-            padding: 16px 40px;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
-            background-color: #26a69a;
+
+            justify-content: flex-end;
+
+            gap: 14px;
+
+            padding:
+                20px 45px;
+
+            background:
+                linear-gradient(135deg,
+                    #006633 0%,
+                    #009966 100%);
+
             color: white;
-            font-weight: 600;
+
             font-size: 20px;
-        }
 
-        /* Header row disamakan tinggi dengan isi */
-        .header-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: stretch;
-            /* biar ngikut tinggi konten */
-            padding: 0 20px;
-            min-height: auto;
-            /* biarkan isi yang menentukan tinggi */
-        }
+            font-weight: 700;
 
-        /* Sosmed ikon */
-        .sosmed-icons a {
-            color: #444;
-            margin-left: 12px;
-            font-size: 18px;
-            text-decoration: none;
-        }
+            clip-path:
+                polygon(0 0,
+                    100% 0,
+                    95% 100%,
+                    0 100%);
 
-        .sticky-header {
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .table-modern {
-            border-collapse: separate;
-            border-spacing: 0;
             overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.03);
+
+            box-shadow:
+                0 15px 30px rgba(0, 102, 51, .25);
+        }
+
+        .ribbon-front::before {
+
+            content: '';
+
+            position: absolute;
+
+            width: 180px;
+            height: 180px;
+
+            background:
+                rgba(255, 255, 255, .08);
+
+            border-radius: 50%;
+
+            right: -40px;
+            top: -60px;
+        }
+
+        .header-row {
+
+            display: flex;
+
+            justify-content: space-between;
+
+            align-items: stretch;
+
+            padding: 0 24px;
+        }
+
+        /* SOSMED */
+        .sosmed-icons {
+
+            display: flex;
+
+            align-items: center;
+
+            gap: 14px;
+        }
+
+        .sosmed-icons a {
+
+            width: 42px;
+            height: 42px;
+
+            border-radius: 14px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                rgba(0, 153, 102, .08);
+
+            color: var(--primary);
+
+            font-size: 18px;
+
+            text-decoration: none;
+
+            transition: .25s ease;
+        }
+
+        .sosmed-icons a:hover {
+
+            background:
+                linear-gradient(135deg,
+                    var(--primary),
+                    var(--secondary));
+
+            color: white;
+
+            transform:
+                translateY(-3px);
+        }
+
+        /* MODERN TABLE */
+        .table-modern {
+
+            border-collapse: separate;
+
+            border-spacing: 0;
+
+            border-radius: 24px;
+
+            overflow: hidden;
+
+            background: white;
+
+            box-shadow:
+                0 12px 30px rgba(0, 0, 0, .04);
         }
 
         .table-modern thead {
-            background: linear-gradient(90deg, #198754, #2db598);
+
+            background:
+                linear-gradient(135deg,
+                    #006633,
+                    #009966);
+
             color: white;
-            font-weight: 600;
-            font-size: 14px;
         }
 
-        .table-modern th,
+        .table-modern th {
+
+            border: none !important;
+
+            padding: 18px;
+
+            font-size: 13px;
+
+            font-weight: 700;
+
+            text-transform: uppercase;
+
+            letter-spacing: .5px;
+
+            white-space: nowrap;
+        }
+
         .table-modern td {
+
+            padding: 18px;
+
             vertical-align: middle;
-            padding: 12px;
+
+            border-color: #eef2f7;
+
             font-size: 14px;
-            text-align: center;
         }
 
         .table-modern tbody tr {
-            background-color: #fff;
-            transition: all 0.3s ease-in-out;
+
+            transition: .25s ease;
         }
 
         .table-modern tbody tr:hover {
-            background-color: #f1fdf7;
+
+            background: #f0fdf4;
+
+            transform: scale(1.002);
         }
 
+        /* GLASS CARD */
+        .glass-card {
+
+            background:
+                rgba(255, 255, 255, .7);
+
+            backdrop-filter: blur(16px);
+
+            border:
+                1px solid rgba(255, 255, 255, .25);
+
+            border-radius: 28px;
+
+            box-shadow:
+                0 10px 35px rgba(0, 0, 0, .05);
+        }
+
+        /* CARD HOVER */
+        .card-hover {
+
+            transition:
+                transform .25s ease,
+                box-shadow .25s ease;
+        }
+
+        .card-hover:hover {
+
+            transform:
+                translateY(-6px);
+
+            box-shadow:
+                0 18px 40px rgba(0, 102, 51, .12);
+        }
+
+        /* BUTTON */
+        .btn-modern {
+
+            border: none;
+
+            border-radius: 18px;
+
+            padding:
+                12px 22px;
+
+            font-weight: 700;
+
+            transition: .25s ease;
+        }
+
+        .btn-gradient {
+
+            background:
+                linear-gradient(135deg,
+                    var(--primary),
+                    var(--secondary));
+
+            color: white;
+        }
+
+        .btn-gradient:hover {
+
+            color: white;
+
+            transform:
+                translateY(-2px);
+
+            box-shadow:
+                0 10px 24px rgba(0, 153, 102, .25);
+        }
+
+        /* LOGIN MODAL */
+        .modal-content {
+
+            border: none;
+
+            border-radius: 28px;
+
+            overflow: hidden;
+
+            box-shadow:
+                0 25px 50px rgba(0, 0, 0, .15);
+        }
+
+        .modal-header {
+
+            background:
+                linear-gradient(135deg,
+                    #006633,
+                    #009966);
+
+            color: white;
+
+            border: none;
+
+            padding: 24px 28px;
+        }
+
+        .modal-title {
+
+            font-weight: 700;
+        }
+
+        .modal-body {
+
+            padding: 28px;
+        }
+
+        .modal-footer {
+
+            border: none;
+
+            padding:
+                0 28px 28px;
+        }
+
+        .form-control {
+
+            border-radius: 16px;
+
+            border: 1px solid #dbe4ea;
+
+            padding: 14px 16px;
+
+            font-size: 14px;
+
+            transition: .25s ease;
+        }
+
+        .form-control:focus {
+
+            border-color: #009966;
+
+            box-shadow:
+                0 0 0 .25rem rgba(0, 153, 102, .12);
+        }
+
+        /* ANIMATION */
         .animate-fade {
-            animation: fadeInUp 0.5s ease forwards;
+
+            animation:
+                fadeInUp .5s ease forwards;
+
             opacity: 0;
-            transform: translateY(10px);
+
+            transform: translateY(12px);
         }
 
         @keyframes fadeInUp {
+
             to {
+
                 opacity: 1;
+
                 transform: translateY(0);
             }
         }
 
-        @media (max-width: 768px) {
+        /* BACK TO TOP */
+        .back-to-top {
+
+            position: fixed;
+
+            right: 24px;
+            bottom: 24px;
+
+            width: 52px;
+            height: 52px;
+
+            border: none;
+
+            border-radius: 18px;
+
+            display: none;
+
+            align-items: center;
+
+            justify-content: center;
+
+            background:
+                linear-gradient(135deg,
+                    var(--primary),
+                    var(--secondary));
+
+            color: white;
+
+            z-index: 999;
+
+            box-shadow:
+                0 15px 30px rgba(0, 102, 51, .25);
+
+            transition: .25s ease;
+        }
+
+        .back-to-top:hover {
+
+            transform:
+                translateY(-4px);
+        }
+
+        /* MOBILE */
+        @media(max-width:768px) {
+
             body {
+
                 cursor: auto !important;
             }
 
             .custom-cursor {
+
                 display: none !important;
+            }
+
+            .header-row {
+
+                flex-direction: column;
+
+                gap: 12px;
+
+                padding: 12px;
+            }
+
+            .ribbon-wrapper {
+
+                width: 100%;
+
+                margin-left: 0;
+            }
+
+            .ribbon-front {
+
+                justify-content: center;
+
+                clip-path: none;
+
+                border-radius: 20px;
+
+                text-align: center;
             }
         }
     </style>
 </head>
 
 <body>
-    <div class="custom-cursor" id="cursor"></div>
 
+    <!-- CUSTOM CURSOR -->
+    <div class="custom-cursor"
+        id="cursor"></div>
+
+    <!-- HEADER -->
     <?= $this->include('partials/header_main') ?>
 
+    <!-- CONTENT -->
+    <main class="animate-fade">
 
+        <?= $this->renderSection('content') ?>
 
-    <?= $this->renderSection('content') ?>
+    </main>
 
-    <!-- Modal Login -->
-    <div class="modal fade" id="loginModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <form id="loginForm" class="modal-content">
+    <!-- LOGIN MODAL -->
+    <div class="modal fade"
+        id="loginModal"
+        tabindex="-1"
+        aria-hidden="true">
+
+        <div class="modal-dialog modal-dialog-centered">
+
+            <form id="loginForm"
+                class="modal-content">
+
                 <div class="modal-header">
-                    <h5 class="modal-title">Halaman Login Alumni</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+
+                    <h5 class="modal-title">
+
+                        <i class="bi bi-shield-lock-fill me-2"></i>
+                        Login Alumni UMAHA
+
+                    </h5>
+
+                    <button type="button"
+                        class="btn-close btn-close-white"
+                        data-bs-dismiss="modal"></button>
+
                 </div>
+
                 <div class="modal-body">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" name="email" required>
-                    <label class="form-label mt-2">Password</label>
-                    <div class="position-relative">
-                        <input type="password" class="form-control" name="password" id="loginPassword" required>
-                        <i class="bi bi-eye-slash toggle-password" id="togglePassword" style="position: absolute; top: 50%; right: 12px; transform: translateY(-50%); cursor: pointer;"></i>
+
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Email
+
+                        </label>
+
+                        <input type="email"
+                            class="form-control"
+                            name="email"
+                            required>
+
                     </div>
 
-                    <div id="loginError" class="text-danger mt-2 small"></div>
+                    <div class="mb-3">
+
+                        <label class="form-label fw-semibold">
+
+                            Password
+
+                        </label>
+
+                        <div class="position-relative">
+
+                            <input type="password"
+                                class="form-control pe-5"
+                                name="password"
+                                id="loginPassword"
+                                required>
+
+                            <i class="bi bi-eye-slash"
+                                id="togglePassword"
+                                style="
+                                    position:absolute;
+                                    top:50%;
+                                    right:18px;
+                                    transform:translateY(-50%);
+                                    cursor:pointer;
+                                    color:#64748b;
+                                "></i>
+
+                        </div>
+
+                    </div>
+
+                    <div id="loginError"
+                        class="text-danger small mt-2"></div>
+
                 </div>
-                <div class="modal-footer mb-3">
-                    <button id="loginButton" class="btn btn-success w-100" type="submit">
-                        <span class="spinner-border spinner-border-sm me-2 d-none" role="status" aria-hidden="true" id="loginSpinner"></span>
-                        <span id="loginText">MASUK</span>
+
+                <div class="modal-footer flex-column">
+
+                    <button id="loginButton"
+                        class="btn btn-gradient btn-modern w-100"
+                        type="submit">
+
+                        <span class="spinner-border spinner-border-sm me-2 d-none"
+                            role="status"
+                            id="loginSpinner"></span>
+
+                        <span id="loginText">
+
+                            MASUK
+
+                        </span>
+
                     </button>
 
-                    <a href="#" onclick="openGooglePopup()" class="btn btn-light w-100 h-80 border d-flex align-items-center justify-content-center gap-2 shadow-sm mt-2 mb-5" style="font-weight: 600; font-size: 1rem;">
-                        <!-- Google SVG Icon -->
-                        <svg width="20" height="20" viewBox="0 0 533.5 544.3" xmlns="http://www.w3.org/2000/svg" style="margin-bottom: 3px;">
-                            <path fill="#4285F4" d="M533.5 278.4c0-17.9-1.6-35.1-4.7-51.9H272v98.3h146.9c-6.3 33.6-25.3 62.1-54 81.3v67h87.3c51.1-47 80.3-116.4 80.3-194.7z" />
-                            <path fill="#34A853" d="M272 544.3c72.6 0 133.6-24 178.1-65.3l-87.3-67c-24.1 16.1-54.8 25.7-90.8 25.7-69.8 0-129-47.2-150.1-110.3h-89.1v69.3c44.5 87.8 136.5 147.9 239.2 147.9z" />
-                            <path fill="#FBBC05" d="M121.9 322.4c-10.5-31.3-10.5-65.5 0-96.8v-69.3h-89.1c-39.5 77.5-39.5 169.8 0 247.3l89.1-69.3z" />
-                            <path fill="#EA4335" d="M272 213.1c39.5 0 75 13.6 103.1 40.2l77.4-77.4c-47-43.8-107.9-70.6-180.5-70.6-102.7 0-194.7 60.1-239.2 147.9l89.1 69.3c21.1-63.1 80.3-110.3 150.1-110.3z" />
-                        </svg>
+                    <!-- GOOGLE -->
+                    <a href="#"
+                        onclick="openGooglePopup()"
+                        class="btn btn-light border rounded-4 shadow-sm w-100 py-3 mt-3 fw-semibold">
+
+                        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                            width="20"
+                            class="me-2">
+
                         Masuk dengan Google
+
                     </a>
+
                 </div>
 
             </form>
+
         </div>
+
     </div>
 
-
+    <!-- FOOTER -->
     <?= $this->include('partials/footer_main') ?>
 
-    <!-- JS Login -->
-    <script>
-        document.getElementById('togglePassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('loginPassword');
-            const icon = this;
+    <!-- BACK TO TOP -->
+    <button class="back-to-top"
+        id="backToTop">
 
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('bi-eye-slash');
-                icon.classList.add('bi-eye');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('bi-eye');
-                icon.classList.add('bi-eye-slash');
-            }
-        });
-    </script>
-    <script>
-        const cursor = document.getElementById('cursor');
-        document.addEventListener('mousemove', e => {
-            cursor.style.top = `${e.clientY}px`;
-            cursor.style.left = `${e.clientX}px`;
-        });
+        <i class="bi bi-arrow-up"></i>
 
-        // Hanya aktif di device dengan pointer "fine" (biasanya mouse/trackpad)
-        if (window.matchMedia("(pointer: fine)").matches) {
-            const cursor = document.getElementById('cursor');
+    </button>
+
+    <!-- JS -->
+    <script>
+        // CURSOR
+        if (window.matchMedia("(pointer:fine)").matches) {
+
+            const cursor =
+                document.getElementById('cursor');
+
             document.addEventListener('mousemove', e => {
-                cursor.style.top = `${e.clientY}px`;
-                cursor.style.left = `${e.clientX}px`;
+
+                cursor.style.top =
+                    `${e.clientY}px`;
+
+                cursor.style.left =
+                    `${e.clientX}px`;
             });
         }
-    </script>
-    <script>
-        document.querySelector('#loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const form = this;
-            const data = new FormData(form);
 
-            const btn = document.getElementById('loginButton');
-            const spinner = document.getElementById('loginSpinner');
-            const text = document.getElementById('loginText');
-            const errorBox = document.getElementById('loginError');
+        // PASSWORD TOGGLE
+        document.getElementById('togglePassword')
+            .addEventListener('click', function() {
 
-            // Aktifkan loading
-            btn.disabled = true;
-            spinner.classList.remove('d-none');
-            text.textContent = 'Memproses...';
-            errorBox.textContent = '';
+                const input =
+                    document.getElementById('loginPassword');
 
-            fetch('<?= base_url('auth/login') ?>', {
-                    method: 'POST',
-                    body: data
-                })
-                .then(res => res.json())
-                .then(res => {
-                    if (res.success) {
-                        window.location.href = res.redirect;
-                    } else {
-                        errorBox.textContent = res.message;
-                    }
-                })
-                .catch((e) => {
-                    console.log(e);
-                    errorBox.textContent = 'Terjadi kesalahan saat login.';
-                })
-                .finally(() => {
-                    // Matikan loading setelah selesai
-                    btn.disabled = false;
-                    spinner.classList.add('d-none');
-                    text.textContent = 'MASUK';
-                });
-        });
+                if (input.type === 'password') {
 
+                    input.type = 'text';
 
-        const backToTop = document.getElementById('backToTop');
+                    this.classList.replace(
+                        'bi-eye-slash',
+                        'bi-eye'
+                    );
+
+                } else {
+
+                    input.type = 'password';
+
+                    this.classList.replace(
+                        'bi-eye',
+                        'bi-eye-slash'
+                    );
+                }
+            });
+
+        // LOGIN AJAX
+        document.querySelector('#loginForm')
+            .addEventListener('submit', function(e) {
+
+                e.preventDefault();
+
+                const form = this;
+
+                const data =
+                    new FormData(form);
+
+                const btn =
+                    document.getElementById('loginButton');
+
+                const spinner =
+                    document.getElementById('loginSpinner');
+
+                const text =
+                    document.getElementById('loginText');
+
+                const errorBox =
+                    document.getElementById('loginError');
+
+                btn.disabled = true;
+
+                spinner.classList.remove('d-none');
+
+                text.textContent =
+                    'Memproses...';
+
+                fetch('<?= base_url('auth/login') ?>', {
+
+                        method: 'POST',
+                        body: data
+
+                    })
+                    .then(res => res.json())
+                    .then(res => {
+
+                        if (res.success) {
+
+                            window.location.href =
+                                res.redirect;
+
+                        } else {
+
+                            errorBox.textContent =
+                                res.message;
+                        }
+                    })
+                    .catch(() => {
+
+                        errorBox.textContent =
+                            'Terjadi kesalahan saat login.';
+                    })
+                    .finally(() => {
+
+                        btn.disabled = false;
+
+                        spinner.classList.add('d-none');
+
+                        text.textContent =
+                            'MASUK';
+                    });
+            });
+
+        // BACK TO TOP
+        const backToTop =
+            document.getElementById('backToTop');
+
         window.addEventListener('scroll', () => {
-            backToTop.style.display = window.scrollY > 300 ? 'block' : 'none';
+
+            backToTop.style.display =
+                window.scrollY > 300 ?
+                'flex' :
+                'none';
         });
+
         backToTop.addEventListener('click', () => {
+
             window.scrollTo({
+
                 top: 0,
                 behavior: 'smooth'
             });
         });
-    </script>
 
-    <script>
+        // GOOGLE POPUP
         function openGooglePopup() {
+
             const width = 500;
-            const height = 600;
-            const left = (screen.width - width) / 2;
-            const top = (screen.height - height) / 2;
+            const height = 650;
+
+            const left =
+                (screen.width - width) / 2;
+
+            const top =
+                (screen.height - height) / 2;
 
             const popup = window.open(
+
                 "<?= base_url('auth/google') ?>",
+
                 "Login with Google",
-                `width=${width},height=${height},top=${top},left=${left}`
+
+                `width=${width},
+                height=${height},
+                top=${top},
+                left=${left}`
+
             );
 
-            const checkPopup = setInterval(() => {
-                if (!popup || popup.closed) {
-                    clearInterval(checkPopup);
-                    // Optionally: reload or redirect after login
-                    window.location.href = "<?= base_url('alumni/dashboard') ?>";
-                }
-            }, 1000);
+            const checkPopup =
+                setInterval(() => {
+
+                    if (!popup || popup.closed) {
+
+                        clearInterval(checkPopup);
+
+                        window.location.href =
+                            "<?= base_url('alumni/dashboard') ?>";
+                    }
+
+                }, 1000);
         }
     </script>
 
+    <script>
+        // CUSTOM CURSOR
+        if (window.matchMedia("(pointer:fine)").matches) {
 
+            const cursor =
+                document.getElementById('cursor');
+
+            document.addEventListener('mousemove', e => {
+
+                cursor.style.top =
+                    `${e.clientY}px`;
+
+                cursor.style.left =
+                    `${e.clientX}px`;
+            });
+
+            // HOVER EFFECT
+            const hoverElements =
+                document.querySelectorAll(
+                    'a, button, .btn, input, textarea, select'
+                );
+
+            hoverElements.forEach(el => {
+
+                el.addEventListener('mouseenter', () => {
+
+                    cursor.style.transform =
+                        'translate(-50%, -50%) scale(1.35)';
+
+                    cursor.style.background =
+                        'rgba(0, 153, 102, .10)';
+                });
+
+                el.addEventListener('mouseleave', () => {
+
+                    cursor.style.transform =
+                        'translate(-50%, -50%) scale(1)';
+
+                    cursor.style.background =
+                        'rgba(255,255,255,.04)';
+                });
+            });
+        }
+    </script>
+    <!-- BOOTSTRAP -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
 </body>
 
 </html>

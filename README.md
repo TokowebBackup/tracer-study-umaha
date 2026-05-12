@@ -115,8 +115,14 @@ program_studi	Program Studi	select	Ya	1	source_table: prodi
     -   Jalankan migrasi dan seed jika tersedia  
 
 3. Start the server  
+##### Clear cache
 ```
-php spark serve
+php spark cache:clear
+```
+
+##### Run server
+```
+php spark serve Or php spark serve --port 8000
 ```  
 
 **Optional**
@@ -162,6 +168,21 @@ git filter-branch --force --index-filter \
 git push origin main --force
 
 ```  
+
+##### Docs DB 
+```
+ALTER TABLE kuesioner_fields ADD conditional_field VARCHAR(100) NULL, ADD conditional_value VARCHAR(100) NULL, ADD section_key VARCHAR(100) NULL;
+```
+
+```
+ALTER TABLE tracer_study
+ADD domisili_alumni VARCHAR(255) NULL,
+ADD bulan_mulai_mencari_pekerjaan VARCHAR(100) NULL,
+ADD updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
+ON UPDATE CURRENT_TIMESTAMP;
+``` 
+
+
 
 
 🙌 Kontribusi

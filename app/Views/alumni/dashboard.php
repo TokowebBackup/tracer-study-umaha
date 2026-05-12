@@ -1,5 +1,150 @@
 <?= $this->extend('layouts/alumni') ?>
+<?php
+/** @var array $alumni */
+/** @var array $tracer */
+/** @var array $groupedFields */
+?>
 <?= $this->section('content') ?>
+<style>
+    .dashboard-hero {
+        background: linear-gradient(135deg, #006633 0%, #009966 100%);
+        border-radius: 24px;
+        padding: 40px;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, .12);
+        z-index: 1;
+    }
+
+    .dashboard-hero>* {
+        position: relative;
+        z-index: 2;
+    }
+
+    .dashboard-hero::before {
+        content: '';
+        position: absolute;
+        right: -50px;
+        top: -50px;
+        width: 220px;
+        height: 220px;
+        background: rgba(255, 255, 255, .08);
+        border-radius: 50%;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .modern-card {
+        border: none;
+        border-radius: 22px;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, .06);
+        transition: .3s ease;
+    }
+
+    .modern-card:hover {
+        transform: translateY(-3px);
+    }
+
+    .modern-card .card-header {
+        border: none;
+        padding: 18px 24px;
+    }
+
+    .modern-card .card-body {
+        padding: 24px;
+    }
+
+    .info-item {
+        background: #f8faf9;
+        border-radius: 18px;
+        padding: 18px;
+        height: 100%;
+        border: 1px solid #edf2ef;
+        transition: .25s ease;
+    }
+
+    .info-item:hover {
+        background: #f1f9f4;
+        transform: translateY(-2px);
+    }
+
+    .info-label {
+        font-size: 13px;
+        color: #6c757d;
+        margin-bottom: 6px;
+    }
+
+    .info-value {
+        font-weight: 600;
+        color: #1c1c1c;
+        font-size: 15px;
+    }
+
+    .section-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #006633;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .btn-umaha {
+        background: linear-gradient(135deg, #006633 0%, #009966 100%);
+        border: none;
+        color: white;
+        border-radius: 14px;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+    .btn-umaha:hover {
+        color: white;
+        opacity: .95;
+    }
+
+    .btn-soft {
+        background: #eef8f1;
+        color: #006633;
+        border-radius: 14px;
+        border: none;
+        padding: 10px 18px;
+        font-weight: 600;
+    }
+
+    .modal-content {
+        border: none;
+        border-radius: 24px;
+        overflow: hidden;
+    }
+
+    .modal-header {
+        border: none;
+        padding: 24px;
+        background: linear-gradient(135deg, #006633 0%, #009966 100%);
+    }
+
+    .modal-body {
+        padding: 28px;
+        background: #fcfcfc;
+    }
+
+    .modal-footer {
+        border: none;
+        padding: 20px 24px;
+    }
+
+    .badge-modern {
+        background: rgba(255, 255, 255, .18);
+        padding: 8px 14px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+    }
+</style>
 
 <div class="container mt-5">
     <?php if (session()->getFlashdata('info')): ?>
@@ -9,43 +154,147 @@
         </div>
     <?php endif; ?>
 
-    <h4 class="mb-4">Dashboard Alumni</h4>
-    <a href="<?= base_url('/') ?>" class="btn btn-link mt-2 mb-5">
-        <i class="bi bi-backspace-fill"></i> Kembali ke Halaman Tracer
-    </a>
+    <div class="dashboard-hero mb-4">
+
+        <div class="d-flex justify-content-between align-items-start flex-wrap">
+
+            <div>
+                <div class="badge-modern mb-3">
+                    Dashboard Alumni UMAHA
+                </div>
+
+                <h2 class="fw-bold mb-2">
+                    Selamat Datang,
+                    <?= esc($alumni['nama']) ?>
+                </h2>
+
+                <p class="mb-0 opacity-75">
+                    Kelola data tracer study alumni Anda dengan mudah.
+                </p>
+            </div>
+
+            <div class="mt-3 mt-md-0">
+                <a href="<?= base_url('/') ?>" class="btn btn-light rounded-4 px-4">
+                    <i class="bi bi-arrow-left"></i>
+                    Kembali
+                </a>
+            </div>
+
+        </div>
+
+    </div>
 
     <!-- Biodata -->
-    <div class="card mb-4">
-        <div class="card-header bg-success text-white">Biodata</div>
-        <div class="card-body">
-            <p><strong>NIM:</strong> <?= esc($alumni['nim']) ?></p>
-            <p><strong>Nama:</strong> <?= esc($alumni['nama']) ?></p>
-            <p><strong>Prodi:</strong> <?= esc($alumni['nama_prodi']) ?> (<?= esc($alumni['jenjang']) ?>)</p>
-            <p><strong>Tahun Lulus:</strong> <?= esc($alumni['tahun_lulus']) ?></p>
+    <div class="card modern-card mb-4">
+
+        <div class="card-header bg-success text-white">
+            <i class="bi bi-person-vcard-fill me-2"></i>
+            Biodata Alumni
         </div>
+
+        <div class="card-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">NIM</div>
+                        <div class="info-value"><?= esc($alumni['nim']) ?></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">Nama Lengkap</div>
+                        <div class="info-value"><?= esc($alumni['nama']) ?></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">Program Studi</div>
+                        <div class="info-value">
+                            <?= esc($alumni['nama_prodi']) ?>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="info-item">
+                        <div class="info-label">Tahun Lulus</div>
+                        <div class="info-value">
+                            <?= esc($alumni['tahun_lulus']) ?>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
     </div>
 
     <?php if ($tracer): ?>
-        <div class="card mb-4 shadow-sm">
-            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                <span><i class="bi bi-bar-chart"></i> Data Tracer Study</span>
+        <div class="card modern-card mb-4">
+
+            <div class="card-header bg-info text-white d-flex justify-content-between align-items-center flex-wrap">
+
                 <div>
-                    <a href="<?= base_url('alumni/tracer/edit') ?>" class="btn btn-light btn-sm me-2">
-                        <i class="bi bi-pencil-square"></i> Edit
-                    </a>
-                    <button class="btn btn-warning btn-sm" data-bs-toggle="modal" data-bs-target="#detailTracerModal">
-                        <i class="bi bi-eye"></i> Lihat Detail
-                    </button>
+                    <i class="bi bi-bar-chart-line-fill me-2"></i>
+                    Data Tracer Study
                 </div>
+
+                <div class="mt-2 mt-md-0">
+
+                    <a href="<?= base_url('alumni/tracer/edit') ?>"
+                        class="btn btn-light btn-sm rounded-4 px-3 me-2">
+
+                        <i class="bi bi-pencil-square"></i>
+                        Edit
+                    </a>
+
+                    <button
+                        class="btn btn-warning btn-sm rounded-4 px-3"
+                        data-bs-toggle="modal"
+                        data-bs-target="#detailTracerModal">
+
+                        <i class="bi bi-eye-fill"></i>
+                        Detail
+                    </button>
+
+                </div>
+
             </div>
+
             <div class="card-body">
-                <p>Terakhir diperbarui pada:
-                    <em><?= date('d M Y H:i', strtotime($tracer['updated_at'] ?? $tracer['created_at'])) ?></em>
-                </p>
-                <p class="text-muted mb-0">
-                    Klik <strong>Lihat Detail</strong> untuk menampilkan seluruh data tracer Anda.
-                </p>
+
+                <div class="row align-items-center">
+
+                    <div class="col-md-8">
+
+                        <h5 class="fw-bold mb-2">
+                            Data tracer sudah tersimpan
+                        </h5>
+
+                        <p class="text-muted mb-0">
+                            Terakhir diperbarui:
+                            <?= date('d M Y H:i', strtotime($tracer['updated_at'] ?? $tracer['created_at'])) ?>
+                        </p>
+
+                    </div>
+
+                    <div class="col-md-4 text-md-end mt-3 mt-md-0">
+
+                        <div class="badge bg-success px-3 py-2 rounded-pill">
+                            Status Aktif
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
 
         <!-- MODAL DETAIL -->
@@ -60,69 +309,105 @@
                     </div>
 
                     <div class="modal-body">
-                        <!-- INFORMASI UMUM -->
-                        <h6 class="fw-bold text-primary mb-2">📅 Informasi Umum</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <p><strong>Tahun Pengisian:</strong> <?= esc($tracer['tahun_pengisian']) ?></p>
-                                <p><strong>Tahun Lulus:</strong> <?= esc($tracer['tahun_lulus']) ?></p>
-                                <p><strong>Domisili:</strong> <?= esc($tracer['domisili_alumni']) ?></p>
-                                <p><strong>Bulan Mulai Mencari Pekerjaan:</strong> <?= esc($tracer['bulan_mulai_mencari_pekerjaan']) ?></p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Status Pekerjaan:</strong> <?= esc(ucwords($tracer['status_pekerjaan'])) ?></p>
-                                <p><strong>Institusi Bekerja:</strong> <?= esc($tracer['institusi_bekerja']) ?></p>
-                                <p><strong>Posisi Pekerjaan:</strong> <?= esc($tracer['posisi_pekerjaan']) ?></p>
-                            </div>
-                        </div>
+                        <?php foreach ($groupedFields as $header => $fields): ?>
 
-                        <hr>
+                            <?php
 
-                        <!-- RIWAYAT PEKERJAAN -->
-                        <h6 class="fw-bold text-primary mb-2">💼 Riwayat Pekerjaan</h6>
-                        <div class="row mb-3">
-                            <div class="col-md-6">
-                                <p><strong>Tahun Mulai Bekerja:</strong> <?= esc($tracer['tahun_mulai_bekerja']) ?></p>
-                                <p><strong>Gaji Pertama:</strong> Rp<?= number_format($tracer['gaji_pertama'], 0, ',', '.') ?></p>
-                                <p><strong>Kabupaten Tempat Kerja:</strong> <?= esc($tracer['tempat_kerja_kabupaten']) ?></p>
+                            // cek apakah ada data yang terisi
+                            $hasValue = false;
+
+                            foreach ($fields as $field) {
+
+                                $fieldName = $field['field_name'];
+
+                                if (
+                                    isset($tracer[$fieldName]) &&
+                                    $tracer[$fieldName] !== '' &&
+                                    $tracer[$fieldName] !== null
+                                ) {
+                                    $hasValue = true;
+                                    break;
+                                }
+                            }
+
+                            // skip section kosong
+                            if (!$hasValue) {
+                                continue;
+                            }
+
+                            ?>
+
+                            <h6 class="fw-bold text-primary mb-3">
+                                <?= esc($header) ?>
+                            </h6>
+
+                            <div class="row mb-4">
+
+                                <?php foreach ($fields as $field): ?>
+
+                                    <?php
+
+                                    $fieldName = $field['field_name'];
+
+                                    $value = $tracer[$fieldName] ?? null;
+
+                                    // skip field kosong
+                                    if ($value === '' || $value === null) {
+                                        continue;
+                                    }
+
+                                    ?>
+
+                                    <div class="col-md-6 mb-3">
+
+                                        <div class="info-item">
+
+                                            <div class="info-label">
+                                                <?= esc($field['label']) ?>
+                                            </div>
+
+                                            <div class="info-value">
+
+                                                <?php
+
+                                                // format angka gaji / pendapatan
+                                                if (
+                                                    is_numeric($value) &&
+                                                    (
+                                                        str_contains($fieldName, 'gaji') ||
+                                                        str_contains($fieldName, 'pendapatan')
+                                                    )
+                                                ) {
+
+                                                    echo 'Rp ' . number_format($value, 0, ',', '.');
+                                                } else {
+
+                                                    echo nl2br(esc($value));
+                                                }
+
+                                                ?>
+
+                                            </div>
+
+                                        </div>
+
+                                    </div>
+
+                                <?php endforeach; ?>
+
                             </div>
-                            <div class="col-md-6">
-                                <p><strong>Sektor Tempat Kerja:</strong> <?= esc($tracer['sektor_tempat_kerja']) ?></p>
-                                <p><strong>Pekerjaan Sesuai Bidang:</strong> <?= ucfirst(esc($tracer['sesuai_bidang'])) ?></p>
-                                <p><strong>Dapat Kerja Sebelum Lulus:</strong> <?= ucfirst(esc($tracer['dapat_kerja_sebelum_lulus'])) ?></p>
-                                <p><strong>Cara Mendapat Kerja:</strong> <?= nl2br(esc($tracer['cara_mendapat_kerja'])) ?></p>
-                            </div>
-                        </div>
 
-                        <hr>
+                            <hr>
 
-                        <!-- PENILAIAN KEPUASAN -->
-                        <h6 class="fw-bold text-primary mb-2">📊 Penilaian Kepuasan</h6>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <p><strong>Etika:</strong> <?= esc($tracer['kepuasan_etika']) ?>/5</p>
-                                <p><strong>Keahlian Bidang Ilmu:</strong> <?= esc($tracer['kepuasan_keahlian_bidan_ilmu']) ?>/5</p>
-                                <p><strong>Bahasa Asing:</strong> <?= esc($tracer['kepuasan_bahasa_asing']) ?>/5</p>
-                                <p><strong>Teknologi Informasi:</strong> <?= esc($tracer['kepuasan_teknologi_informasi']) ?>/5</p>
-                            </div>
-                            <div class="col-md-6">
-                                <p><strong>Komunikasi:</strong> <?= esc($tracer['kepuasan_komunikasi']) ?>/5</p>
-                                <p><strong>Kerjasama:</strong> <?= esc($tracer['kepuasan_kerjasama']) ?>/5</p>
-                                <p><strong>Pengembangan Diri:</strong> <?= esc($tracer['kepuasan_pengembangan_diri']) ?>/5</p>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <!-- RELEVANSI DAN SARAN -->
-                        <h6 class="fw-bold text-primary mb-2">📘 Relevansi & Saran</h6>
-                        <p><strong>Relevansi Kurikulum:</strong> <?= ucfirst(esc($tracer['relevansi_kurikulum'])) ?></p>
-                        <p><strong>Saran Kurikulum:</strong><br><?= nl2br(esc($tracer['saran_kurikulum'])) ?></p>
-                        <p><strong>Harapan terhadap UMAHA:</strong><br><?= nl2br(esc($tracer['harapan_umaha'])) ?></p>
+                        <?php endforeach; ?>
 
                         <div class="text-end text-muted small mt-3">
-                            <em>Diperbarui pada: <?= date('d M Y H:i', strtotime($tracer['updated_at'] ?? $tracer['created_at'])) ?></em>
+                            <em>
+                                Diperbarui pada:
+                                <?= date('d M Y H:i', strtotime($tracer['updated_at'] ?? $tracer['created_at'])) ?>
+                            </em>
                         </div>
+
                     </div>
 
                     <div class="modal-footer">

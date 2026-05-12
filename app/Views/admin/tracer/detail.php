@@ -1,4 +1,9 @@
 <?= $this->extend('layouts/admin_main') ?>
+<?php
+/** @var array $tracer */
+/** @var array $group_fields */
+/** @var array $groupedFields */
+?>
 <?= $this->section('content') ?>
 
 <h4 class="mb-3"><i class="bi bi-person-lines-fill"></i> Detail Tracer Study</h4>
@@ -14,41 +19,117 @@
             </a>
         </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <p><strong>Tahun Pengisian:</strong> <?= esc($tracer['tahun_pengisian']) ?></p>
-                    <p><strong>Tahun Lulus:</strong> <?= esc($tracer['tahun_lulus']) ?></p>
-                    <p><strong>Status Pekerjaan:</strong> <?= esc($tracer['status_pekerjaan']) ?></p>
-                    <p><strong>Institusi Bekerja:</strong> <?= esc($tracer['institusi_bekerja']) ?></p>
-                    <p><strong>Posisi Pekerjaan:</strong> <?= esc($tracer['posisi_pekerjaan']) ?></p>
-                    <p><strong>Tahun Mulai Bekerja:</strong> <?= esc($tracer['tahun_mulai_bekerja']) ?></p>
-                    <p><strong>Gaji Pertama:</strong> <?= $tracer['gaji_pertama'] ? 'Rp' . number_format($tracer['gaji_pertama'], 0, ',', '.') : '-' ?></p>
-                    <p><strong>Kabupaten Tempat Kerja:</strong> <?= esc($tracer['tempat_kerja_kabupaten']) ?></p>
-                    <p><strong>Sektor Tempat Kerja:</strong> <?= esc($tracer['sektor_tempat_kerja']) ?></p>
-                    <p><strong>Sesuai Bidang:</strong> <?= esc(ucfirst($tracer['sesuai_bidang'])) ?></p>
-                    <p><strong>Dapat Kerja Sebelum Lulus:</strong> <?= esc(ucfirst($tracer['dapat_kerja_sebelum_lulus'])) ?></p>
-                    <p><strong>Cara Mendapat Pekerjaan:</strong> <?= nl2br(esc($tracer['cara_mendapat_kerja'])) ?></p>
-                    <p><strong>Bulan Mulai Mencari Pekerjaan:</strong> <?= esc($tracer['bulan_mulai_mencari_pekerjaan']) ?></p>
-                    <p><strong>Domisili Alumni:</strong> <?= nl2br(esc($tracer['domisili_alumni'])) ?></p>
-                </div>
-                <div class="col-md-6">
-                    <h6><strong>Penilaian Kepuasan</strong></h6>
-                    <p>Etika: <?= esc($tracer['kepuasan_etika']) ?>/5</p>
-                    <p>Keahlian Bidang Ilmu: <?= esc($tracer['kepuasan_keahlian_bidan_ilmu']) ?>/5</p>
-                    <p>Bahasa Asing: <?= esc($tracer['kepuasan_bahasa_asing']) ?>/5</p>
-                    <p>Teknologi Informasi: <?= esc($tracer['kepuasan_teknologi_informasi']) ?>/5</p>
-                    <p>Komunikasi: <?= esc($tracer['kepuasan_komunikasi']) ?>/5</p>
-                    <p>Kerjasama: <?= esc($tracer['kepuasan_kerjasama']) ?>/5</p>
-                    <p>Pengembangan Diri: <?= esc($tracer['kepuasan_pengembangan_diri']) ?>/5</p>
 
-                    <h6 class="mt-3"><strong>Kurikulum dan Saran</strong></h6>
-                    <p><strong>Relevansi Kurikulum:</strong> <?= esc(ucfirst($tracer['relevansi_kurikulum'])) ?></p>
-                    <p><strong>Saran Kurikulum:</strong><br><?= nl2br(esc($tracer['saran_kurikulum'])) ?></p>
-                    <p><strong>Harapan untuk UMAHA:</strong><br><?= nl2br(esc($tracer['harapan_umaha'])) ?></p>
+            <div class="row mb-4">
 
-                    <p class="text-muted mt-3"><small><strong>Terakhir Diperbarui:</strong> <?= esc($tracer['created_at']) ?></small></p>
+                <div class="col-md-6">
+                    <p><strong>Nama:</strong> <?= esc($tracer['nama']) ?></p>
+                    <p><strong>NIM:</strong> <?= esc($tracer['nim']) ?></p>
+                    <p><strong>Email:</strong> <?= esc($tracer['email']) ?></p>
                 </div>
+
+                <div class="col-md-6">
+                    <p><strong>Program Studi:</strong> <?= esc($tracer['nama_prodi']) ?></p>
+                    <p><strong>Jenjang:</strong> <?= esc($tracer['jenjang']) ?></p>
+                </div>
+
             </div>
+
+            <hr>
+
+            <?php foreach ($groupedFields as $header => $fields): ?>
+
+                <?php
+
+                $hasValue = false;
+
+                foreach ($fields as $field) {
+
+                    $fieldName = $field['field_name'];
+
+                    if (
+                        isset($tracer[$fieldName]) &&
+                        $tracer[$fieldName] !== '' &&
+                        $tracer[$fieldName] !== null
+                    ) {
+                        $hasValue = true;
+                        break;
+                    }
+                }
+
+                if (!$hasValue) {
+                    continue;
+                }
+
+                ?>
+
+                <h5 class="fw-bold text-success mt-4 mb-3">
+                    <?= esc($header) ?>
+                </h5>
+
+                <div class="row">
+
+                    <?php foreach ($fields as $field): ?>
+
+                        <?php
+
+                        $fieldName = $field['field_name'];
+
+                        $value = $tracer[$fieldName] ?? null;
+
+                        if ($value === '' || $value === null) {
+                            continue;
+                        }
+
+                        ?>
+
+                        <div class="col-md-6 mb-3">
+
+                            <div class="border rounded-4 p-3 h-100 bg-light">
+
+                                <div class="text-muted small mb-1">
+                                    <?= esc($field['label']) ?>
+                                </div>
+
+                                <div class="fw-semibold">
+
+                                    <?php
+
+                                    if (
+                                        is_numeric($value) &&
+                                        (
+                                            str_contains($fieldName, 'gaji') ||
+                                            str_contains($fieldName, 'pendapatan')
+                                        )
+                                    ) {
+
+                                        echo 'Rp ' . number_format($value, 0, ',', '.');
+                                    } else {
+
+                                        echo nl2br(esc($value));
+                                    }
+
+                                    ?>
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                    <?php endforeach; ?>
+
+                </div>
+
+            <?php endforeach; ?>
+
+            <div class="text-end text-muted mt-4">
+                <small>
+                    Diperbarui:
+                    <?= date('d M Y H:i', strtotime($tracer['updated_at'] ?? $tracer['created_at'])) ?>
+                </small>
+            </div>
+
         </div>
     </div>
 <?php else: ?>

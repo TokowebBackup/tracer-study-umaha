@@ -79,37 +79,91 @@ class KuesionerAlumni extends BaseController
     {
         $post = $this->request->getPost();
 
-        // Validasi sederhana (lu bisa tambah custom lagi)
-        if (!$this->validate([
-            'tahun_pengisian' => 'required|numeric'
-        ])) {
-            return redirect()->back()->withInput()->with('error', 'Isian wajib belum lengkap.');
+        // =========================
+        // VALIDATION RULES
+        // =========================
+
+        $rules = [
+            'tahun_pengisian' => 'required|numeric',
+            'nim'             => 'required',
+            'nama'            => 'required',
+            'program_studi'   => 'required',
+            'tahun_lulus'     => 'required',
+            'email'           => 'required|valid_email',
+        ];
+
+        // =========================
+        // CONDITIONAL VALIDATION
+        // =========================
+
+        if (($post['status_pekerjaan'] ?? '') === 'Studi Lanjut') {
+
+            $rules['sumber_biaya_studi_lanjut'] = 'required';
+            $rules['perguruan_tinggi_studi_lanjut'] = 'required';
+            $rules['program_studi_lanjut'] = 'required';
+        }
+
+        if (($post['status_pekerjaan'] ?? '') === 'Wirausaha') {
+
+            $rules['nama_usaha'] = 'required';
+            $rules['skala_usaha'] = 'required';
+            $rules['pendapatan_usaha'] = 'required|numeric';
+        }
+
+        // =========================
+        // VALIDATE
+        // =========================
+
+        if (!$this->validate($rules)) {
+
+            return redirect()
+                ->back()
+                ->withInput()
+                ->with('error', validation_list_errors());
         }
 
         $alumniId = session()->get('alumni_id');
 
-        // Update data alumni tetap jalan
+        // =========================
+        // UPDATE DATA ALUMNI
+        // =========================
+
         $alumniModel = new \App\Models\AlumniModel();
+
         $alumniModel->update($alumniId, [
-            'nim' => $post['nim'],
-            'nama' => $post['nama'],
-            'program_studi' => $post['program_studi'] ?? null,
-            'tahun_lulus' => $post['tahun_lulus'] ?? null,
+
+            'nim'             => $post['nim'],
+            'nama'            => $post['nama'],
+            'program_studi'   => $post['program_studi'] ?? null,
+            'tahun_lulus'     => $post['tahun_lulus'] ?? null,
+            'email'           => $post['email'] ?? null,
+            'nik'             => $post['nik'] ?? null,
+            'npwp'            => $post['npwp'] ?? null,
         ]);
 
-        // Ambil allowed fields dari model
-        $tracerModel = new TracerModel();
-        $allowedFields = $tracerModel->allowedFields;
+        // =========================
+        // SIMPAN TRACER
+        // =========================
 
-        // Tambahkan alumni_id ke post supaya ikut keinsert
+        $tracerModel = new TracerModel();
+
+        // tambahkan alumni_id
         $post['alumni_id'] = $alumniId;
 
-        // Filter input yang sesuai allowedFields
-        // $dataToSave = array_intersect_key($post, array_flip($allowedFields));
+        // ambil field tabel tracer_study
+        $allowedFields = $tracerModel->allowedFields;
 
-        // Simpan ke database
-        $tracerModel->insert($post);
+        // filter hanya field yang ada di tabel
+        $dataInsert = array_intersect_key(
+            $post,
+            array_flip($allowedFields)
+        );
 
-        return redirect()->to('/')->with('success', 'Data tracer berhasil disimpan.');
+        // insert
+        $tracerModel->insert($dataInsert);
+
+        return redirect()
+            ->to('/')
+            ->with('success', 'Data tracer berhasil disimpan.');
     }
 }

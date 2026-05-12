@@ -1,4 +1,27 @@
 <?= $this->extend('layouts/main') ?>
+<?php
+/** @var array $tahun_list */
+/** @var array $prodi_list */
+
+/** @var string|null $filter_tahun */
+/** @var string|null $filter_prodi */
+
+/** @var array $rekap_prodi */
+/** @var array $rekap_jk */
+/** @var array $rekap_lulus */
+/** @var array $rekap_status */
+/** @var array $rekap_sumberdana */
+/** @var array $rekap_jenjang */
+/** @var array $rekap_terdaftar */
+/** @var array $rekap_kabupaten */
+/** @var array $rekap_sektor */
+/** @var array $rekap_sesuai */
+/** @var array $rekap_sebelum_lulus */
+/** @var array $rekap_relevansi */
+
+/** @var array $rekap_bulan_sebelum */
+/** @var array $rekap_bulan_setelah */
+?>
 <?= $this->section('content') ?>
 
 <div class="container my-5">

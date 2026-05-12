@@ -1,4 +1,9 @@
 <?= $this->extend('layouts/admin_main') ?>
+<?php
+/** @var array $list */
+/** @var array $fields_step2 */
+/** @var array $select_options */
+?>
 <?= $this->section('content') ?>
 
 <div class="container p-4">
@@ -15,6 +20,7 @@
                         <th>Lulusan Tahun</th>
                         <th>Periode</th>
                         <th>Surat</th>
+                        <th width="180">Aksi</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -22,13 +28,36 @@
                         <tr>
                             <td><?= esc($row['tahun']) ?></td>
                             <td><?= esc($row['lulusan_tahun']) ?></td>
-                            <td><?= date('d/m/Y', strtotime($row['tanggal_mulai'])) ?> - <?= date('d/m/Y', strtotime($row['tanggal_selesai'])) ?></td>
+
+                            <td>
+                                <?= date('d/m/Y', strtotime($row['tanggal_mulai'])) ?>
+                                -
+                                <?= date('d/m/Y', strtotime($row['tanggal_selesai'])) ?>
+                            </td>
+
                             <td>
                                 <?php if ($row['file_surat']): ?>
-                                    <a href="<?= base_url($row['file_surat']) ?>" target="_blank" class="btn btn-sm btn-success">Lihat</a>
+                                    <a href="<?= base_url($row['file_surat']) ?>"
+                                        target="_blank"
+                                        class="btn btn-sm btn-success">
+                                        Lihat
+                                    </a>
                                 <?php else: ?>
                                     <span class="text-muted">Tidak Ada</span>
                                 <?php endif ?>
+                            </td>
+
+                            <td>
+                                <a href="<?= base_url('admin/periode/edit/' . $row['id']) ?>"
+                                    class="btn btn-warning btn-sm">
+                                    Edit
+                                </a>
+
+                                <a href="<?= base_url('admin/periode/delete/' . $row['id']) ?>"
+                                    class="btn btn-danger btn-sm"
+                                    onclick="return confirm('Yakin ingin menghapus data ini?')">
+                                    Delete
+                                </a>
                             </td>
                         </tr>
                     <?php endforeach ?>

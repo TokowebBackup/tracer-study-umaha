@@ -9,7 +9,7 @@ class TracerModel extends Model
     protected $table = 'tracer_study';
     protected $primaryKey = 'id';
     public $timestamps = true;
-    protected $protectFields = false;
+    protected $protectFields = true;
 
     public function __construct()
     {

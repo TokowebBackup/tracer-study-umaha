@@ -1,5 +1,21 @@
 <!-- app/Views/rekap_pengguna.php -->
 <?= $this->extend('layouts/main') ?>
+
+<?php
+/** @var array $tahun_list */
+/** @var array $rekap_prodi */
+/** @var array $rekap_jenjang */
+/** @var array $rekap_lembaga */
+/** @var array $rekap_lulus */
+/** @var array $rekap_wilayah */
+/** @var array $rekap_terdaftar */
+/** @var array $rekap_kondisi */
+/** @var array $list */
+
+/** @var string|null $filter_tahun */
+/** @var string|null $filter_nama */
+?>
+
 <?= $this->section('content') ?>
 
 <div class="container mt-4">
@@ -239,7 +255,7 @@
             </div>
         </div>
     </div>
-    
+
     <div class="card mb-5 shadow-sm border-0 rounded-4 animate-fade">
         <div class="card-header bg-gradient-to-r from-success to-teal text-dark rounded-top-4 fw-semibold">
             Penilaian Pengguna terhadap Lulusan UMAHA
@@ -324,12 +340,12 @@
             series: [{
                 name: 'Jumlah',
                 colorByPoint: true,
-                data: <?= json_encode(array_map(function($d) { return [
-                            'name' => $d['nama_prodi'],
-                            'y' => (int) $d['total']
-                        ];
-                    
-                }, $rekap_prodi)) ?>
+                data: <?= json_encode(array_map(function ($d) {
+                            return [
+                                'name' => $d['nama_prodi'],
+                                'y' => (int) $d['total']
+                            ];
+                        }, $rekap_prodi)) ?>
             }]
         });
 
@@ -344,11 +360,11 @@
             series: [{
                 name: 'Jumlah',
                 colorByPoint: true,
-                data: <?= json_encode(array_map(function($d) { 
-                        return [
-                            'name' => $d['jenjang'],
-                            'y' => (int) $d['total']
-                        ];
+                data: <?= json_encode(array_map(function ($d) {
+                            return [
+                                'name' => $d['jenjang'],
+                                'y' => (int) $d['total']
+                            ];
                         }, $rekap_jenjang)) ?>
             }]
         });
@@ -364,11 +380,11 @@
             series: [{
                 name: 'Jumlah',
                 colorByPoint: true,
-                data: <?= json_encode(array_map(function($d) { 
-                    return [
-                            'name' => $d['lembaga'],
-                            'y' => (int) $d['total']
-                        ];
+                data: <?= json_encode(array_map(function ($d) {
+                            return [
+                                'name' => $d['lembaga'],
+                                'y' => (int) $d['total']
+                            ];
                         }, $rekap_lembaga)) ?>
             }]
         });
@@ -384,11 +400,11 @@
             series: [{
                 name: 'Jumlah',
                 colorByPoint: true,
-                data: <?= json_encode(array_map(function($d) { 
-                    return [
-                            'name' => $d['tahun_lulus'],
-                            'y' => (int) $d['total']
-                        ];
+                data: <?= json_encode(array_map(function ($d) {
+                            return [
+                                'name' => $d['tahun_lulus'],
+                                'y' => (int) $d['total']
+                            ];
                         }, $rekap_lulus)) ?>
             }]
         });
@@ -404,11 +420,11 @@
             series: [{
                 name: 'Jumlah',
                 colorByPoint: true,
-                data: <?= json_encode(array_map(function($d) { 
-                    return [
-                            'name' => $d['provinsi_kota'],
-                            'y' => (int) $d['total']
-                        ];
+                data: <?= json_encode(array_map(function ($d) {
+                            return [
+                                'name' => $d['provinsi_kota'],
+                                'y' => (int) $d['total']
+                            ];
                         }, $rekap_wilayah)) ?>
             }]
         });
@@ -424,11 +440,11 @@
             series: [{
                 name: 'Jumlah',
                 colorByPoint: true,
-                data: <?= json_encode(array_map(function($d) { 
-                    return [
-                            'name' => $d['tahun_masuk'],
-                            'y' => (int) $d['total']
-                        ];
+                data: <?= json_encode(array_map(function ($d) {
+                            return [
+                                'name' => $d['tahun_masuk'],
+                                'y' => (int) $d['total']
+                            ];
                         }, $rekap_terdaftar)) ?>
             }]
         });
@@ -444,11 +460,11 @@
             series: [{
                 name: 'Jumlah',
                 colorByPoint: true,
-                data: <?= json_encode(array_map(function($d) { 
-                    return [
-                            'name' => $d['status_pekerjaan'],
-                            'y' => (int) $d['total']
-                        ];
+                data: <?= json_encode(array_map(function ($d) {
+                            return [
+                                'name' => $d['status_pekerjaan'],
+                                'y' => (int) $d['total']
+                            ];
                         }, $rekap_kondisi)) ?>
             }]
         });
@@ -468,7 +484,7 @@
                 min: 0,
                 max: 5,
                 title: {
-                    text: 'Rata-rata Skor (1–5)'
+                    text: 'Rata-rata Skor (1ï¿½5)'
                 }
             },
             tooltip: {
@@ -488,13 +504,13 @@
             series: [{
                 name: 'Skor Rata-rata',
                 data: [
-                    <?= number_format(array_sum(array_column($list, 'etika_kerja')) / max(count($list),1),2) ?>,
-                    <?= number_format(array_sum(array_column($list, 'keahlian_profesional')) / max(count($list),1),2) ?>,
-                    <?= number_format(array_sum(array_column($list, 'penguasaan_bahasa_asing')) / max(count($list),1),2) ?>,
-                    <?= number_format(array_sum(array_column($list, 'teknologi_informasi')) / max(count($list),1),2) ?>,
-                    <?= number_format(array_sum(array_column($list, 'komunikasi')) / max(count($list),1),2) ?>,
-                    <?= number_format(array_sum(array_column($list, 'kerjasama')) / max(count($list),1),2) ?>,
-                    <?= number_format(array_sum(array_column($list, 'pengembangan_diri')) / max(count($list),1),2) ?>
+                    <?= number_format(array_sum(array_column($list, 'etika_kerja')) / max(count($list), 1), 2) ?>,
+                    <?= number_format(array_sum(array_column($list, 'keahlian_profesional')) / max(count($list), 1), 2) ?>,
+                    <?= number_format(array_sum(array_column($list, 'penguasaan_bahasa_asing')) / max(count($list), 1), 2) ?>,
+                    <?= number_format(array_sum(array_column($list, 'teknologi_informasi')) / max(count($list), 1), 2) ?>,
+                    <?= number_format(array_sum(array_column($list, 'komunikasi')) / max(count($list), 1), 2) ?>,
+                    <?= number_format(array_sum(array_column($list, 'kerjasama')) / max(count($list), 1), 2) ?>,
+                    <?= number_format(array_sum(array_column($list, 'pengembangan_diri')) / max(count($list), 1), 2) ?>
                 ]
             }]
         });

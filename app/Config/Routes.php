@@ -64,9 +64,16 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
 
     // Setting & Panduan
     $routes->get('periode', 'Admin\Periode::index');
+    $routes->get('periode/tambah', 'Admin\Periode::tambah');
     $routes->post('periode/simpan', 'Admin\Periode::simpan');
+
+    $routes->get('periode/edit/(:num)', 'Admin\Periode::edit/$1');
+    $routes->post('periode/update/(:num)', 'Admin\Periode::update/$1');
+    $routes->get('periode/delete/(:num)', 'Admin\Periode::delete/$1');
+
     $routes->get('panduan', 'Admin\Panduan::index');
     $routes->post('panduan/upload', 'Admin\Panduan::upload');
+
 
     // Landing Page
     $routes->get('landing', 'Admin\Landing::index');
