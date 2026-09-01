@@ -527,4 +527,45 @@
 
 </div>
 
+<script>
+    function openGooglePopup(url = '/auth/google') {
+
+        const width = 600;
+        const height = 700;
+
+        const left = (screen.width / 2) - (width / 2);
+        const top = (screen.height / 2) - (height / 2);
+
+        const popup = window.open(
+            url,
+            'googleLogin',
+            `
+            width=${width},
+            height=${height},
+            top=${top},
+            left=${left},
+            toolbar=no,
+            location=no,
+            directories=no,
+            status=no,
+            menubar=no,
+            scrollbars=yes,
+            resizable=yes
+            `
+        );
+
+        // Optional auto refresh setelah login sukses
+        const timer = setInterval(() => {
+
+            if (popup.closed) {
+
+                clearInterval(timer);
+
+                window.location.reload();
+            }
+
+        }, 1000);
+    }
+</script>
+
 <?= $this->endSection() ?>

@@ -96,7 +96,6 @@
         }
 
         /* CUSTOM CURSOR */
-        /* CUSTOM CURSOR */
         .custom-cursor {
 
             position: fixed;
@@ -112,11 +111,13 @@
 
             border-radius: 50%;
 
-            pointer-events: none;
+            pointer-events: none !important;
+
+            user-select: none;
 
             transform: translate(-50%, -50%);
 
-            z-index: 2147483647;
+            z-index: 9999;
 
             /* HAPUS backdrop-filter */
             /* backdrop-filter: blur(4px); */
@@ -141,6 +142,11 @@
 
             /* FIX IMPORTANT */
             isolation: isolate;
+        }
+
+        body.modal-open .custom-cursor {
+
+            display: none !important;
         }
 
         .custom-cursor::after {
@@ -566,6 +572,48 @@
             }
         }
 
+        #togglePassword {
+
+            position: absolute;
+
+            top: 50%;
+
+            right: 14px;
+
+            transform: translateY(-50%);
+
+            border: none;
+
+            background: transparent;
+
+            width: 36px;
+
+            height: 36px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            color: #64748b;
+
+            cursor: pointer;
+
+            z-index: 10;
+        }
+
+        .position-relative {
+            z-index: 1;
+        }
+
+        #togglePassword i {
+
+            font-size: 18px;
+
+            pointer-events: none;
+        }
+
         /* BACK TO TOP */
         .back-to-top {
 
@@ -648,6 +696,97 @@
                 text-align: center;
             }
         }
+
+        body.modal-open {
+
+            cursor: default !important;
+        }
+
+        body.modal-open * {
+
+            cursor: default !important;
+        }
+
+        body.modal-open .custom-cursor {
+
+            display: none !important;
+        }
+
+        /* PASSWORD TOGGLE FIX */
+        .password-wrapper {
+
+            position: relative;
+
+            width: 100%;
+        }
+
+        .password-input {
+
+            padding-right: 52px !important;
+        }
+
+        .toggle-password {
+
+            position: absolute;
+
+            top: 50%;
+
+            right: 16px;
+
+            transform: translateY(-50%);
+
+            z-index: 99999;
+
+            width: 34px;
+
+            height: 34px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+            color: #64748b;
+
+            user-select: none;
+
+            pointer-events: auto;
+        }
+
+        .toggle-password i {
+
+            font-size: 20px;
+
+            pointer-events: none;
+        }
+
+        /* FIX MODAL STACKING */
+        .modal {
+
+            z-index: 2000;
+        }
+
+        .modal-backdrop {
+
+            z-index: 1990;
+        }
+
+        /* FIX CUSTOM CURSOR */
+        .custom-cursor {
+
+            pointer-events: none !important;
+        }
+
+        /* FIX BOOTSTRAP INPUT */
+        .form-control {
+
+            position: relative;
+
+            z-index: 1;
+        }
     </style>
 </head>
 
@@ -713,29 +852,23 @@
                     <div class="mb-3">
 
                         <label class="form-label fw-semibold">
-
                             Password
-
                         </label>
 
-                        <div class="position-relative">
+                        <div class="password-wrapper">
 
                             <input type="password"
-                                class="form-control pe-5"
+                                class="form-control password-input"
                                 name="password"
                                 id="loginPassword"
                                 required>
 
-                            <i class="bi bi-eye-slash"
-                                id="togglePassword"
-                                style="
-                                    position:absolute;
-                                    top:50%;
-                                    right:18px;
-                                    transform:translateY(-50%);
-                                    cursor:pointer;
-                                    color:#64748b;
-                                "></i>
+                            <span id="togglePassword"
+                                class="toggle-password">
+
+                                <i class="bi bi-eye-slash"></i>
+
+                            </span>
 
                         </div>
 
@@ -815,97 +948,45 @@
         }
 
         // PASSWORD TOGGLE
-        document.getElementById('togglePassword')
-            .addEventListener('click', function() {
+        // PASSWORD TOGGLE FIX
+        document.addEventListener('DOMContentLoaded', function() {
 
-                const input =
-                    document.getElementById('loginPassword');
+            const togglePassword =
+                document.getElementById('togglePassword');
 
-                if (input.type === 'password') {
+            const passwordInput =
+                document.getElementById('loginPassword');
 
-                    input.type = 'text';
+            const icon =
+                togglePassword.querySelector('i');
 
-                    this.classList.replace(
-                        'bi-eye-slash',
-                        'bi-eye'
-                    );
-
-                } else {
-
-                    input.type = 'password';
-
-                    this.classList.replace(
-                        'bi-eye',
-                        'bi-eye-slash'
-                    );
-                }
-            });
-
-        // LOGIN AJAX
-        document.querySelector('#loginForm')
-            .addEventListener('submit', function(e) {
+            togglePassword.addEventListener('click', function(e) {
 
                 e.preventDefault();
 
-                const form = this;
+                e.stopPropagation();
 
-                const data =
-                    new FormData(form);
+                if (passwordInput.type === 'password') {
 
-                const btn =
-                    document.getElementById('loginButton');
+                    passwordInput.type = 'text';
 
-                const spinner =
-                    document.getElementById('loginSpinner');
+                    icon.classList.remove('bi-eye-slash');
 
-                const text =
-                    document.getElementById('loginText');
+                    icon.classList.add('bi-eye');
 
-                const errorBox =
-                    document.getElementById('loginError');
+                } else {
 
-                btn.disabled = true;
+                    passwordInput.type = 'password';
 
-                spinner.classList.remove('d-none');
+                    icon.classList.remove('bi-eye');
 
-                text.textContent =
-                    'Memproses...';
+                    icon.classList.add('bi-eye-slash');
+                }
 
-                fetch('<?= base_url('auth/login') ?>', {
-
-                        method: 'POST',
-                        body: data
-
-                    })
-                    .then(res => res.json())
-                    .then(res => {
-
-                        if (res.success) {
-
-                            window.location.href =
-                                res.redirect;
-
-                        } else {
-
-                            errorBox.textContent =
-                                res.message;
-                        }
-                    })
-                    .catch(() => {
-
-                        errorBox.textContent =
-                            'Terjadi kesalahan saat login.';
-                    })
-                    .finally(() => {
-
-                        btn.disabled = false;
-
-                        spinner.classList.add('d-none');
-
-                        text.textContent =
-                            'MASUK';
-                    });
             });
+
+        });
+
 
         // BACK TO TOP
         const backToTop =
@@ -1011,6 +1092,112 @@
                 });
             });
         }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            const form = document.getElementById('loginForm');
+
+            form.addEventListener('submit', async function(e) {
+
+                e.preventDefault();
+
+                const btn = document.getElementById('loginButton');
+
+                const spinner = document.getElementById('loginSpinner');
+
+                const text = document.getElementById('loginText');
+
+                const errorBox = document.getElementById('loginError');
+
+                errorBox.textContent = '';
+
+                btn.disabled = true;
+
+                spinner.classList.remove('d-none');
+
+                text.textContent = 'Memproses...';
+
+                try {
+
+                    const response = await fetch(
+                        "<?= base_url('auth/login') ?>", {
+
+                            method: 'POST',
+
+                            body: new FormData(form),
+
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest'
+                            }
+                        }
+                    );
+
+                    const res = await response.json();
+
+                    if (res.success) {
+
+                        await Swal.fire({
+
+                            icon: 'success',
+
+                            title: 'Login berhasil',
+
+                            text: 'Mengalihkan ke dashboard...',
+
+                            timer: 1200,
+
+                            showConfirmButton: false
+
+                        });
+
+                        window.location.href = res.redirect;
+
+                    } else {
+
+                        errorBox.textContent = res.message;
+
+                        Swal.fire({
+
+                            icon: 'error',
+
+                            title: 'Login gagal',
+
+                            text: res.message
+
+                        });
+                    }
+
+                } catch (err) {
+
+                    console.error(err);
+
+                    errorBox.textContent =
+                        'Terjadi kesalahan saat login.';
+
+                    Swal.fire({
+
+                        icon: 'error',
+
+                        title: 'Server Error',
+
+                        text: 'Terjadi kesalahan saat login'
+
+                    });
+
+                } finally {
+
+                    btn.disabled = false;
+
+                    spinner.classList.add('d-none');
+
+                    text.textContent = 'MASUK';
+                }
+
+            });
+
+        });
     </script>
     <!-- BOOTSTRAP -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

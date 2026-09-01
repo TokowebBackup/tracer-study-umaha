@@ -22,6 +22,11 @@ class AlumniModel extends Model
         'no_hp',
         'password',
         'provinsi',
-        'kota'
+        'kota',
+
+        // FINALISASI TRACER
+        'nik',
+        'npwp',
+        'sumber_dana',
     ];
 }

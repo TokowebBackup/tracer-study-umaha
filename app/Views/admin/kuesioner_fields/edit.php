@@ -50,6 +50,32 @@
         <input type="number" name="order" value="<?= esc($field['order']) ?>" class="form-control">
     </div>
 
+    <div class="mb-3">
+        <label class="form-label">
+            Conditional Field
+        </label>
+
+        <input
+            type="text"
+            name="conditional_field"
+            class="form-control"
+            value="<?= esc($field['conditional_field']) ?>"
+            placeholder="contoh: status_pekerjaan">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Conditional Value
+        </label>
+
+        <input
+            type="text"
+            name="conditional_value"
+            class="form-control"
+            value="<?= esc($field['conditional_value']) ?>"
+            placeholder="contoh: bekerja">
+    </div>
+
     <button class="btn btn-primary" type="submit">Simpan Perubahan</button>
     <a href="<?= base_url('admin/kuesionerfields') ?>" class="btn btn-secondary">Kembali</a>
 </form>

@@ -20,17 +20,32 @@
     <?php endif ?>
 
     <form method="post" action="<?= base_url('kuesioner/pengguna/simpan') ?>" id="multiStepForm">
+        <input
+            type="hidden"
+            name="token"
+            value="<?= esc($request['token']) ?>">
         <!-- LANGKAH 1 -->
         <div class="form-step step-1 active">
             <h5>Langkah 1: Informasi Perusahaan & Rekrutmen</h5>
             <div class="row">
                 <div class="col-md-12 mb-2">
                     <label>Nama Perusahaan</label>
-                    <input type="text" name="nama_perusahaan" class="form-control" required>
+                    <input
+                        type="text"
+                        name="nama_perusahaan"
+                        class="form-control"
+                        value="<?= esc($request['nama_perusahaan']) ?>"
+                        readonly
+                        required>
                 </div>
                 <div class="col-md-12 mb-2">
                     <label>Alamat Perusahaan</label>
-                    <textarea name="alamat_perusahaan" class="form-control"></textarea>
+                    <textarea
+                        name="alamat_perusahaan"
+                        class="form-control"
+                        readonly><?= esc(
+                                        $request['alamat_perusahaan'] ?? ''
+                                    ) ?></textarea>
                 </div>
                 <div class="col-md-12 mb-2">
                     <label>Nama Pengisi</label>
@@ -46,7 +61,12 @@
                 </div>
                 <div class="col-md-6 mb-2">
                     <label>No. Telepon / WhatsApp</label>
-                    <input type="text" name="no_telp_pengisi" class="form-control">
+                    <input
+                        type="text"
+                        name="no_telp_pengisi"
+                        class="form-control"
+                        value="<?= esc($request['no_telp_penilai'] ?? '') ?>"
+                        readonly>
                 </div>
                 <div class="col-md-6 mb-2">
                     <label>Tahun Merekrut</label>
@@ -78,7 +98,7 @@
             ?>
                 <div class="mb-3">
                     <label><?= $label ?> (1 = Sangat Kurang, 5 = Sangat Baik)</label>
-                    <select class="form-select" name="<?= $key ?>" required>
+                    <select class="form-select step2-required" name="<?= $key ?>">
                         <option value="">Pilih</option>
                         <?php for ($i = 1; $i <= 5; $i++): ?>
                             <option value="<?= $i ?>"><?= $i ?></option>
@@ -93,7 +113,13 @@
             </div>
 
             <button type="button" class="btn btn-secondary" onclick="prevStep()">Kembali</button>
-            <button type="submit" class="btn btn-success">Kirim Kuesioner</button>
+            <button
+                type="button"
+                class="btn btn-success"
+                onclick="submitForm()">
+
+                Kirim Kuesioner
+            </button>
         </div>
     </form>
 </div>
@@ -139,4 +165,42 @@
     }
 </script>
 
+<script>
+    function submitForm() {
+
+        const step2Fields =
+            document.querySelectorAll('.step2-required');
+
+        let isValid = true;
+
+        step2Fields.forEach(field => {
+
+            if (!field.value.trim()) {
+
+                field.classList.add('is-invalid');
+
+                isValid = false;
+
+            } else {
+
+                field.classList.remove('is-invalid');
+            }
+
+        });
+
+        if (!isValid) {
+
+            Swal.fire({
+                icon: 'warning',
+                title: 'Lengkapi Penilaian',
+                text: 'Harap isi semua penilaian sebelum mengirim kuesioner.',
+                confirmButtonColor: '#3085d6',
+            });
+
+            return;
+        }
+
+        document.getElementById('multiStepForm').submit();
+    }
+</script>
 <?= $this->endSection() ?>

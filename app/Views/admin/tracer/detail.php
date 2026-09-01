@@ -1,142 +1,619 @@
 <?= $this->extend('layouts/admin_main') ?>
+
 <?php
 /** @var array $tracer */
 /** @var array $group_fields */
 /** @var array $groupedFields */
 ?>
+
 <?= $this->section('content') ?>
 
-<h4 class="mb-3"><i class="bi bi-person-lines-fill"></i> Detail Tracer Study</h4>
+<style>
+    .page-hero {
 
-<a href="<?= base_url('admin/tracer') ?>" class="btn btn-secondary mb-3"><i class="bi bi-arrow-left"></i> Kembali</a>
+        background:
+            linear-gradient(135deg,
+                #006633 0%,
+                #009966 100%);
 
-<?php if ($tracer): ?>
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-            <span>Data Tracer Study Lengkap</span>
-            <a href="<?= base_url('alumni/tracer/edit') ?>" class="btn btn-light btn-sm">
-                <i class="bi bi-pencil-square"></i> Edit
-            </a>
+        border-radius: 30px;
+
+        padding: 40px;
+
+        color: white;
+
+        position: relative;
+
+        overflow: hidden;
+
+        box-shadow:
+            0 15px 40px rgba(0, 0, 0, .08);
+    }
+
+    .page-hero::before {
+
+        content: '';
+
+        position: absolute;
+
+        width: 260px;
+        height: 260px;
+
+        border-radius: 50%;
+
+        background: rgba(255, 255, 255, .08);
+
+        top: -80px;
+        right: -80px;
+    }
+
+    .page-hero h3 {
+
+        font-weight: 800;
+
+        margin-bottom: 10px;
+
+        position: relative;
+        z-index: 2;
+    }
+
+    .page-hero p {
+
+        opacity: .9;
+
+        margin-bottom: 0;
+
+        position: relative;
+        z-index: 2;
+    }
+
+    .glass-card {
+
+        background: rgba(255, 255, 255, .92);
+
+        backdrop-filter: blur(14px);
+
+        border-radius: 28px;
+
+        overflow: hidden;
+
+        border: 1px solid rgba(255, 255, 255, .25);
+
+        box-shadow:
+            0 10px 35px rgba(0, 0, 0, .05);
+    }
+
+    .btn-modern {
+
+        border: none;
+
+        border-radius: 16px;
+
+        padding: 12px 22px;
+
+        font-weight: 700;
+
+        transition: .25s ease;
+    }
+
+    .btn-modern:hover {
+
+        transform: translateY(-2px);
+    }
+
+    .btn-back {
+
+        background: #f1f5f9;
+
+        color: #334155;
+    }
+
+    .btn-back:hover {
+
+        background: #e2e8f0;
+
+        color: #0f172a;
+    }
+
+    .btn-edit {
+
+        background:
+            linear-gradient(135deg,
+                #006633 0%,
+                #009966 100%);
+
+        color: white;
+    }
+
+    .btn-edit:hover {
+
+        color: white;
+
+        box-shadow:
+            0 10px 24px rgba(0, 153, 102, .25);
+    }
+
+    .profile-section {
+
+        padding: 35px;
+
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .profile-grid {
+
+        display: grid;
+
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+
+        gap: 20px;
+    }
+
+    .profile-card {
+
+        background: #f8fafc;
+
+        border: 1px solid #e2e8f0;
+
+        border-radius: 22px;
+
+        padding: 24px;
+
+        transition: .25s ease;
+    }
+
+    .profile-card:hover {
+
+        background: #f0fdf4;
+
+        border-color: rgba(0, 153, 102, .2);
+    }
+
+    .profile-label {
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        text-transform: uppercase;
+
+        letter-spacing: .5px;
+
+        color: #64748b;
+
+        margin-bottom: 10px;
+    }
+
+    .profile-value {
+
+        font-size: 15px;
+
+        font-weight: 700;
+
+        color: #0f172a;
+
+        line-height: 1.7;
+    }
+
+    .section-wrapper {
+
+        padding: 35px;
+    }
+
+    .section-title {
+
+        display: inline-flex;
+
+        align-items: center;
+
+        gap: 10px;
+
+        background:
+            linear-gradient(135deg,
+                rgba(0, 102, 51, .08),
+                rgba(0, 153, 102, .12));
+
+        color: #006633;
+
+        padding: 12px 18px;
+
+        border-radius: 18px;
+
+        font-weight: 800;
+
+        margin-bottom: 25px;
+
+        font-size: 16px;
+    }
+
+    .field-card {
+
+        background: #ffffff;
+
+        border: 1px solid #eef2f7;
+
+        border-radius: 22px;
+
+        padding: 22px;
+
+        height: 100%;
+
+        transition: .25s ease;
+
+        position: relative;
+
+        overflow: hidden;
+    }
+
+    .field-card::before {
+
+        content: '';
+
+        position: absolute;
+
+        top: 0;
+        left: 0;
+
+        width: 100%;
+        height: 4px;
+
+        background:
+            linear-gradient(135deg,
+                #006633,
+                #009966);
+    }
+
+    .field-card:hover {
+
+        transform: translateY(-3px);
+
+        box-shadow:
+            0 12px 28px rgba(0, 0, 0, .05);
+
+        border-color: rgba(0, 153, 102, .18);
+    }
+
+    .field-label {
+
+        font-size: 12px;
+
+        text-transform: uppercase;
+
+        letter-spacing: .6px;
+
+        font-weight: 700;
+
+        color: #64748b;
+
+        margin-bottom: 12px;
+    }
+
+    .field-value {
+
+        font-size: 15px;
+
+        font-weight: 600;
+
+        color: #0f172a;
+
+        line-height: 1.8;
+
+        word-break: break-word;
+    }
+
+    .updated-box {
+
+        border-top: 1px solid #eef2f7;
+
+        padding: 22px 35px;
+
+        background: #f8fafc;
+
+        color: #64748b;
+
+        font-size: 13px;
+
+        display: flex;
+
+        justify-content: end;
+
+        align-items: center;
+    }
+
+    .empty-state {
+
+        padding: 70px 30px;
+
+        text-align: center;
+
+        color: #64748b;
+    }
+
+    .empty-state i {
+
+        font-size: 60px;
+
+        margin-bottom: 20px;
+
+        display: block;
+
+        color: #cbd5e1;
+    }
+
+    @media(max-width:768px) {
+
+        .page-hero {
+
+            padding: 30px 24px;
+        }
+
+        .profile-section,
+        .section-wrapper {
+
+            padding: 25px;
+        }
+
+        .updated-box {
+
+            padding: 20px 25px;
+
+            justify-content: start;
+        }
+    }
+</style>
+
+<div class="container-fluid p-4">
+
+    <!-- HERO -->
+    <div class="page-hero mb-4">
+
+        <div class="d-flex justify-content-between align-items-center flex-wrap">
+
+            <div>
+
+                <h3>
+                    <i class="bi bi-person-lines-fill me-2"></i>
+                    Detail Tracer Study Alumni
+                </h3>
+
+                <p>
+                    Detail lengkap data tracer study alumni UMAHA
+                </p>
+
+            </div>
+
+            <div class="d-flex gap-2 mt-3 mt-md-0">
+
+                <a href="<?= base_url('admin/tracer') ?>"
+                    class="btn btn-light rounded-4 px-4 py-2 fw-semibold">
+
+                    <i class="bi bi-arrow-left me-2"></i>
+                    Kembali
+
+                </a>
+
+                <a href="<?= base_url('alumni/tracer/edit') ?>"
+                    class="btn btn-dark rounded-4 px-4 py-2 fw-semibold">
+
+                    <i class="bi bi-pencil-square me-2"></i>
+                    Edit Data
+
+                </a>
+
+            </div>
+
         </div>
-        <div class="card-body">
 
-            <div class="row mb-4">
+    </div>
 
-                <div class="col-md-6">
-                    <p><strong>Nama:</strong> <?= esc($tracer['nama']) ?></p>
-                    <p><strong>NIM:</strong> <?= esc($tracer['nim']) ?></p>
-                    <p><strong>Email:</strong> <?= esc($tracer['email']) ?></p>
-                </div>
+    <?php if ($tracer): ?>
 
-                <div class="col-md-6">
-                    <p><strong>Program Studi:</strong> <?= esc($tracer['nama_prodi']) ?></p>
-                    <p><strong>Jenjang:</strong> <?= esc($tracer['jenjang']) ?></p>
+        <div class="glass-card">
+
+            <!-- PROFILE -->
+            <div class="profile-section">
+
+                <div class="profile-grid">
+
+                    <div class="profile-card">
+
+                        <div class="profile-label">
+                            Nama Alumni
+                        </div>
+
+                        <div class="profile-value">
+                            <?= esc($tracer['nama']) ?>
+                        </div>
+
+                    </div>
+
+                    <div class="profile-card">
+
+                        <div class="profile-label">
+                            NIM
+                        </div>
+
+                        <div class="profile-value">
+                            <?= esc($tracer['nim']) ?>
+                        </div>
+
+                    </div>
+
+                    <div class="profile-card">
+
+                        <div class="profile-label">
+                            Email
+                        </div>
+
+                        <div class="profile-value">
+                            <?= esc($tracer['email']) ?>
+                        </div>
+
+                    </div>
+
+                    <div class="profile-card">
+
+                        <div class="profile-label">
+                            Program Studi
+                        </div>
+
+                        <div class="profile-value">
+                            <?= esc($tracer['nama_prodi']) ?>
+                        </div>
+
+                    </div>
+
+                    <div class="profile-card">
+
+                        <div class="profile-label">
+                            Jenjang
+                        </div>
+
+                        <div class="profile-value">
+                            <?= esc($tracer['jenjang']) ?>
+                        </div>
+
+                    </div>
+
                 </div>
 
             </div>
 
-            <hr>
-
+            <!-- GROUPED FIELDS -->
             <?php foreach ($groupedFields as $header => $fields): ?>
 
-                <?php
+                <div class="section-wrapper">
 
-                $hasValue = false;
+                    <div class="section-title">
 
-                foreach ($fields as $field) {
+                        <i class="bi bi-ui-checks-grid"></i>
 
-                    $fieldName = $field['field_name'];
+                        <?= esc($header) ?>
 
-                    if (
-                        isset($tracer[$fieldName]) &&
-                        $tracer[$fieldName] !== '' &&
-                        $tracer[$fieldName] !== null
-                    ) {
-                        $hasValue = true;
-                        break;
-                    }
-                }
+                    </div>
 
-                if (!$hasValue) {
-                    continue;
-                }
+                    <div class="row g-4">
 
-                ?>
+                        <?php foreach ($fields as $field): ?>
 
-                <h5 class="fw-bold text-success mt-4 mb-3">
-                    <?= esc($header) ?>
-                </h5>
+                            <?php
 
-                <div class="row">
+                            $fieldName = $field['field_name'];
 
-                    <?php foreach ($fields as $field): ?>
+                            // ========================================
+                            // SKIP FIELD YANG SUDAH ADA DI PROFILE
+                            // ========================================
 
-                        <?php
+                            $skipFields = [
+                                'nama',
+                                'nim',
+                                'program_studi'
+                            ];
 
-                        $fieldName = $field['field_name'];
+                            if (in_array($fieldName, $skipFields)) {
+                                continue;
+                            }
 
-                        $value = $tracer[$fieldName] ?? null;
+                            // ========================================
+                            // VALUE
+                            // ========================================
 
-                        if ($value === '' || $value === null) {
-                            continue;
-                        }
+                            $value = $tracer[$fieldName] ?? '-';
 
-                        ?>
+                            if (
+                                is_string($value) &&
+                                trim($value) === ''
+                            ) {
+                                $value = '-';
+                            }
 
-                        <div class="col-md-6 mb-3">
+                            ?>
 
-                            <div class="border rounded-4 p-3 h-100 bg-light">
+                            <div class="col-md-6">
 
-                                <div class="text-muted small mb-1">
-                                    <?= esc($field['label']) ?>
-                                </div>
+                                <div class="field-card">
 
-                                <div class="fw-semibold">
+                                    <div class="field-label">
 
-                                    <?php
+                                        <?= esc($field['label']) ?>
 
-                                    if (
-                                        is_numeric($value) &&
-                                        (
-                                            str_contains($fieldName, 'gaji') ||
-                                            str_contains($fieldName, 'pendapatan')
-                                        )
-                                    ) {
+                                    </div>
 
-                                        echo 'Rp ' . number_format($value, 0, ',', '.');
-                                    } else {
+                                    <div class="field-value">
 
-                                        echo nl2br(esc($value));
-                                    }
+                                        <?php
 
-                                    ?>
+                                        if (
+                                            is_numeric($value) &&
+                                            (
+                                                str_contains($fieldName, 'gaji') ||
+                                                str_contains($fieldName, 'pendapatan')
+                                            )
+                                        ) {
+
+                                            echo 'Rp ' . number_format($value, 0, ',', '.');
+                                        } else {
+
+                                            echo nl2br(esc($value));
+                                        }
+
+                                        ?>
+
+                                    </div>
 
                                 </div>
 
                             </div>
 
-                        </div>
+                        <?php endforeach; ?>
 
-                    <?php endforeach; ?>
+                    </div>
 
                 </div>
 
             <?php endforeach; ?>
 
-            <div class="text-end text-muted mt-4">
-                <small>
-                    Diperbarui:
-                    <?= date('d M Y H:i', strtotime($tracer['updated_at'] ?? $tracer['created_at'])) ?>
-                </small>
+            <!-- FOOTER -->
+            <div class="updated-box">
+
+                <i class="bi bi-clock-history me-2"></i>
+
+                Diperbarui :
+                <?= date('d M Y H:i', strtotime($tracer['updated_at'] ?? $tracer['created_at'])) ?>
+
             </div>
 
         </div>
-    </div>
-<?php else: ?>
-    <div class="alert alert-warning">
-        Data Tracer Study belum diisi. <a href="<?= base_url('alumni/tracer/create') ?>">Isi sekarang</a>.
-    </div>
-<?php endif; ?>
 
+    <?php else: ?>
+
+        <div class="glass-card">
+
+            <div class="empty-state">
+
+                <i class="bi bi-database-fill-x"></i>
+
+                <h5 class="fw-bold mb-3">
+                    Data Tracer Study Belum Tersedia
+                </h5>
+
+                <p class="mb-4">
+                    Alumni belum mengisi data tracer study.
+                </p>
+
+                <a href="<?= base_url('alumni/tracer/create') ?>"
+                    class="btn btn-success rounded-4 px-4 py-2">
+
+                    Isi Data Sekarang
+
+                </a>
+
+            </div>
+
+        </div>
+
+    <?php endif; ?>
+
+</div>
 
 <?= $this->endSection() ?>

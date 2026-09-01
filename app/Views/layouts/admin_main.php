@@ -535,6 +535,14 @@
 
             </a>
 
+            <a href="<?= base_url('admin/pengguna-request') ?>"
+                class="<?= uri_string() == 'admin/pengguna-request' ? 'active' : '' ?>">
+
+                <i class="bi bi-send-check-fill"></i>
+                Request Pengguna
+
+            </a>
+
             <a href="<?= base_url('admin/kuesioner-pengguna') ?>"
                 class="<?= uri_string() == 'admin/kuesioner-pengguna' ? 'active' : '' ?>">
 

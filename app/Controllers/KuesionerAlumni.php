@@ -9,10 +9,12 @@ use  App\Models\TracerModel;
 class KuesionerAlumni extends BaseController
 {
     protected $db;
+    protected $fieldModel;
 
     public function __construct()
     {
         $this->db = \Config\Database::connect();
+        $this->fieldModel = new \App\Models\KuesionerFieldModel();
     }
 
     public function index()
@@ -68,6 +70,16 @@ class KuesionerAlumni extends BaseController
             }
         }
 
+        // =====================================================
+        // DATA TRACER EXISTING
+        // =====================================================
+
+        $tracerModel = new TracerModel();
+
+        $data['tracer'] = $tracerModel
+            ->where('alumni_id', $id)
+            ->first();
+
         $data['fields_step1'] = $fields_step1;
         $data['fields_step2'] = $fields_step2;
         $data['select_options'] = $select_options;
@@ -79,91 +91,119 @@ class KuesionerAlumni extends BaseController
     {
         $post = $this->request->getPost();
 
-        // =========================
-        // VALIDATION RULES
-        // =========================
+        // =====================================================
+        // VALIDATION DYNAMIC
+        // =====================================================
 
-        $rules = [
-            'tahun_pengisian' => 'required|numeric',
-            'nim'             => 'required',
-            'nama'            => 'required',
-            'program_studi'   => 'required',
-            'tahun_lulus'     => 'required',
-            'email'           => 'required|valid_email',
-        ];
+        $rules = $this->generateValidationRules();
 
-        // =========================
-        // CONDITIONAL VALIDATION
-        // =========================
-
-        if (($post['status_pekerjaan'] ?? '') === 'Studi Lanjut') {
-
-            $rules['sumber_biaya_studi_lanjut'] = 'required';
-            $rules['perguruan_tinggi_studi_lanjut'] = 'required';
-            $rules['program_studi_lanjut'] = 'required';
-        }
-
-        if (($post['status_pekerjaan'] ?? '') === 'Wirausaha') {
-
-            $rules['nama_usaha'] = 'required';
-            $rules['skala_usaha'] = 'required';
-            $rules['pendapatan_usaha'] = 'required|numeric';
-        }
-
-        // =========================
-        // VALIDATE
-        // =========================
+        // tambahan custom validation
+        $rules['nim'] = 'required';
+        $rules['nama'] = 'required';
+        $rules['program_studi'] = 'required';
+        $rules['tahun_lulus'] = 'required';
+        $rules['email'] = 'required|valid_email';
 
         if (!$this->validate($rules)) {
 
             return redirect()
                 ->back()
                 ->withInput()
-                ->with('error', validation_list_errors());
+                ->with(
+                    'error',
+                    validation_list_errors()
+                );
         }
 
         $alumniId = session()->get('alumni_id');
 
-        // =========================
-        // UPDATE DATA ALUMNI
-        // =========================
+        // =====================================================
+        // UPDATE ALUMNI
+        // =====================================================
 
         $alumniModel = new \App\Models\AlumniModel();
 
         $alumniModel->update($alumniId, [
 
-            'nim'             => $post['nim'],
-            'nama'            => $post['nama'],
-            'program_studi'   => $post['program_studi'] ?? null,
-            'tahun_lulus'     => $post['tahun_lulus'] ?? null,
-            'email'           => $post['email'] ?? null,
-            'nik'             => $post['nik'] ?? null,
-            'npwp'            => $post['npwp'] ?? null,
+            'nim'           => $post['nim'] ?? null,
+            'nama'          => $post['nama'] ?? null,
+            'program_studi' => $post['program_studi'] ?? null,
+            'tahun_lulus'   => $post['tahun_lulus'] ?? null,
+            'email'         => $post['email'] ?? null,
+            'nik'           => $post['nik'] ?? null,
+            'npwp'          => $post['npwp'] ?? null,
         ]);
 
-        // =========================
+        // =====================================================
         // SIMPAN TRACER
-        // =========================
+        // =====================================================
 
         $tracerModel = new TracerModel();
 
-        // tambahkan alumni_id
         $post['alumni_id'] = $alumniId;
 
-        // ambil field tabel tracer_study
         $allowedFields = $tracerModel->allowedFields;
 
-        // filter hanya field yang ada di tabel
         $dataInsert = array_intersect_key(
             $post,
             array_flip($allowedFields)
         );
 
-        // insert
-        $tracerModel->insert($dataInsert);
+        // =====================================================
+        // CEK EXISTING
+        // =====================================================
+
+        $existingTracer = $tracerModel
+            ->where('alumni_id', $alumniId)
+            ->first();
+
+        if ($existingTracer) {
+
+            $tracerModel->update(
+                $existingTracer['id'],
+                $dataInsert
+            );
+        } else {
+
+            $tracerModel->insert($dataInsert);
+        }
 
         return redirect()
             ->to('/')
-            ->with('success', 'Data tracer berhasil disimpan.');
+            ->with(
+                'success',
+                'Data tracer berhasil disimpan.'
+            );
+    }
+
+    protected function generateValidationRules()
+    {
+        $fields = $this->fieldModel->findAll();
+
+        $rules = [];
+
+        foreach ($fields as $field) {
+
+            $rule = [];
+
+            if ((int)$field['required'] === 1) {
+
+                $rule[] = 'required';
+            }
+
+            if ($field['type'] === 'email') {
+
+                $rule[] = 'valid_email';
+            }
+
+            if ($field['type'] === 'number') {
+
+                $rule[] = 'numeric';
+            }
+
+            $rules[$field['field_name']] = implode('|', $rule);
+        }
+
+        return $rules;
     }
 }

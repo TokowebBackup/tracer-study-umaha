@@ -38,14 +38,62 @@ class KuesionerPengguna extends BaseController
 
     public function detail($id)
     {
-        $penggunaModel = new PenggunaModel();
-        $data['pengguna'] = $penggunaModel->find($id);
+        $pengguna = $this->penggunaModel
+            ->select('
+            pengguna_lulusan.*,
 
-        if (!$data['pengguna']) {
-            throw new \CodeIgniter\Exceptions\PageNotFoundException('Data tidak ditemukan');
+            alumni.nama as nama_alumni,
+            alumni.nim,
+            alumni.email as email_alumni,
+            alumni.no_hp,
+            alumni.tahun_lulus as tahun_lulus_alumni,
+
+            prodi.nama_prodi,
+            prodi.jenjang,
+
+            pengguna_request.token,
+            pengguna_request.created_at as request_created_at,
+
+            tracer_study.status_pekerjaan,
+            tracer_study.institusi_bekerja,
+            tracer_study.posisi_pekerjaan
+        ')
+            ->join(
+                'alumni',
+                'alumni.id = pengguna_lulusan.alumni_id',
+                'left'
+            )
+            ->join(
+                'prodi',
+                'prodi.kode_prodi = alumni.program_studi',
+                'left'
+            )
+            ->join(
+                'pengguna_request',
+                'pengguna_request.id = pengguna_lulusan.request_id',
+                'left'
+            )
+            ->join(
+                'tracer_study',
+                'tracer_study.alumni_id = alumni.id',
+                'left'
+            )
+            ->where('pengguna_lulusan.id', $id)
+            ->first();
+
+        if (!$pengguna) {
+
+            throw new \CodeIgniter\Exceptions\PageNotFoundException(
+                'Data tidak ditemukan'
+            );
         }
 
-        return view('admin/kuesioner_pengguna/detail', $data);
+        return view(
+            'admin/kuesioner_pengguna/detail',
+            [
+                'pengguna' => $pengguna
+            ]
+        );
     }
 
     // ============================================

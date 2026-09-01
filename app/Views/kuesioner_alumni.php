@@ -2,25 +2,41 @@
 
 <?= $this->extend('layouts/main') ?>
 
+
 <?php
 /** @var array $fields_step1 */
 /** @var array $fields_step2 */
 /** @var array $select_options */
 ?>
 
+
 <?= $this->section('content') ?>
 
 <div class="container mt-4 mb-5">
 
-    <h3 class="mb-4">Form Kuesioner Tracer Study</h3>
+    <h3 class="mb-4">
+        Form Kuesioner Tracer Study
+    </h3>
+
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-danger">
+            <?= session()->getFlashdata('error') ?>
+        </div>
+    <?php endif; ?>
 
     <form action="<?= base_url('kuesioner/alumni/simpan') ?>" method="post">
 
         <?= csrf_field() ?>
 
-        <input type="hidden" name="tahun_pengisian" value="<?= date('Y') ?>">
+        <input
+            type="hidden"
+            name="tahun_pengisian"
+            value="<?= date('Y') ?>">
 
-        <!-- ================= STEP 1 ================= -->
+        <!-- ===================================================== -->
+        <!-- STEP 1 -->
+        <!-- ===================================================== -->
+
         <div id="step-1" class="step">
 
             <?php
@@ -29,9 +45,7 @@
 
             foreach ($fields_step1 as $field) {
 
-                $header = !empty($field['header'])
-                    ? $field['header']
-                    : 'Default Header';
+                $header = $field['header'] ?: 'Informasi Alumni';
 
                 $groups[$header][] = $field;
             }
@@ -40,149 +54,150 @@
 
             <?php foreach ($groups as $header => $fields): ?>
 
-                <?php
-                $hasConditional = false;
+                <div class="field-group mb-4">
 
-                foreach ($fields as $f) {
-                    if (!empty($f['conditional_field'])) {
-                        $hasConditional = true;
-                        break;
-                    }
-                }
-                ?>
-
-                <div class="field-group"
-                    <?= $hasConditional ? 'style="display:none;"' : '' ?>>
-
-                    <h5 class="mb-3">
+                    <h5 class="mb-3 fw-bold text-primary">
                         <?= esc($header) ?>
                     </h5>
 
-                    <div class="row mb-4">
+                    <div class="row">
 
                         <?php foreach ($fields as $field): ?>
 
-                            <div class="col-md-6 mb-3 conditional-field"
+                            <?php
+
+                            $name = $field['field_name'];
+
+                            $required = $field['required']
+                                ? 'required'
+                                : '';
+
+                            $options = json_decode(
+                                $field['options'],
+                                true
+                            );
+
+                            $value = old($name)
+                                ?? ($alumni[$name]
+                                    ?? ($tracer[$name] ?? ''));
+
+                            ?>
+
+                            <div
+                                class="col-md-6 mb-3 conditional-field"
                                 data-conditional-field="<?= esc($field['conditional_field'] ?? '') ?>"
-                                data-conditional-value="<?= esc($field['conditional_value'] ?? '') ?>"
-                                data-section="<?= esc($field['section_key'] ?? '') ?>">
+                                data-conditional-value="<?= esc($field['conditional_value'] ?? '') ?>">
 
                                 <label class="form-label">
+
                                     <?= esc($field['label']) ?>
 
-                                    <?= $field['required'] ? '*' : '' ?>
+                                    <?php if ($field['required']): ?>
+                                        <span class="text-danger">*</span>
+                                    <?php endif; ?>
+
                                 </label>
 
-                                <?php
-
-                                $name = esc($field['field_name']);
-
-                                $required = $field['required']
-                                    ? 'required'
-                                    : '';
-
-                                $options = json_decode($field['options'], true);
-
-                                switch ($field['type']) {
+                                <?php switch ($field['type']):
 
                                     case 'text':
                                     case 'number':
-
-                                        $value = old($name) ?? ($alumni[$name] ?? '');
-
-                                        echo "
-                                    <input
-                                        type='{$field['type']}'
-                                        name='{$name}'
-                                        value='" . esc($value) . "'
-                                        class='form-control'
-                                        {$required}
-                                    >";
-
-                                        break;
-
-                                    case 'textarea':
-
-                                        $value = old($name) ?? ($alumni[$name] ?? '');
-
-                                        echo "
-                                    <textarea
-                                        name='{$name}'
-                                        class='form-control'
-                                        rows='3'
-                                        {$required}
-                                    >" . esc($value) . "</textarea>";
-
-                                        break;
-
-                                    case 'select':
-
-                                        $selectedValue = old($name) ?? ($alumni[$name] ?? '');
-
-                                        echo "<select name='{$name}' class='form-select' {$required}>";
-
-                                        echo "<option value=''>Pilih</option>";
-
-                                        if (
-                                            !empty($field['source_table']) &&
-                                            isset($select_options[$field['source_table']])
-                                        ) {
-
-                                            foreach ($select_options[$field['source_table']] as $opt) {
-
-                                                $value = esc(
-                                                    $opt['value'] ?? array_values($opt)[0]
-                                                );
-
-                                                $label = esc(
-                                                    $opt['label'] ?? ($opt[1] ?? $value)
-                                                );
-
-                                                $selected = ($value == $selectedValue)
-                                                    ? 'selected'
-                                                    : '';
-
-                                                echo "
-                                            <option value='{$value}' {$selected}>
-                                                {$label}
-                                            </option>";
-                                            }
-                                        } elseif (is_array($options)) {
-
-                                            foreach ($options as $opt) {
-
-                                                $selected = ($opt == $selectedValue)
-                                                    ? 'selected'
-                                                    : '';
-
-                                                echo "
-                                            <option value='" . esc($opt) . "' {$selected}>
-                                                " . esc($opt) . "
-                                            </option>";
-                                            }
-                                        }
-
-                                        echo "</select>";
-
-                                        break;
-
-                                    default:
-
-                                        $value = old($name) ?? '';
-
-                                        echo "
-                                    <input
-                                        type='text'
-                                        name='{$name}'
-                                        value='" . esc($value) . "'
-                                        class='form-control'
-                                        {$required}
-                                    >";
-
-                                        break;
-                                }
-
+                                    case 'email':
+                                    case 'date':
                                 ?>
+
+                                        <input
+                                            type="<?= esc($field['type']) ?>"
+                                            name="<?= esc($name) ?>"
+                                            value="<?= esc($value) ?>"
+                                            class="form-control"
+                                            data-required="<?= $field['required'] ? '1' : '0' ?>"
+                                            <?= $required ?>>
+
+                                        <?php break; ?>
+
+                                    <?php
+                                    case 'textarea': ?>
+
+                                        <textarea
+                                            name="<?= esc($name) ?>"
+                                            class="form-control"
+                                            rows="3"
+                                            data-required="<?= $field['required'] ? '1' : '0' ?>"
+                                            <?= $required ?>><?= esc($value) ?></textarea>
+
+                                        <?php break; ?>
+
+                                    <?php
+                                    case 'select': ?>
+
+                                        <select
+                                            name="<?= esc($name) ?>"
+                                            class="form-select"
+                                            data-required="<?= $field['required'] ? '1' : '0' ?>"
+                                            <?= $required ?>>
+
+                                            <option value="">
+                                                Pilih
+                                            </option>
+
+                                            <?php if (
+                                                !empty($field['source_table']) &&
+                                                isset($select_options[$field['source_table']])
+                                            ): ?>
+
+                                                <?php foreach ($select_options[$field['source_table']] as $opt):
+
+                                                    $optValue = $opt['value']
+                                                        ?? array_values($opt)[0];
+
+                                                    $optLabel = $opt['label']
+                                                        ?? ($opt[1] ?? $optValue);
+
+                                                ?>
+
+                                                    <option
+                                                        value="<?= esc($optValue) ?>"
+                                                        <?= $optValue == $value ? 'selected' : '' ?>>
+
+                                                        <?= esc($optLabel) ?>
+
+                                                    </option>
+
+                                                <?php endforeach; ?>
+
+                                            <?php elseif (is_array($options)): ?>
+
+                                                <?php foreach ($options as $opt): ?>
+
+                                                    <option
+                                                        value="<?= esc($opt) ?>"
+                                                        <?= $opt == $value ? 'selected' : '' ?>>
+
+                                                        <?= esc($opt) ?>
+
+                                                    </option>
+
+                                                <?php endforeach; ?>
+
+                                            <?php endif; ?>
+
+                                        </select>
+
+                                        <?php break; ?>
+
+                                    <?php
+                                    default: ?>
+
+                                        <input
+                                            type="text"
+                                            name="<?= esc($name) ?>"
+                                            value="<?= esc($value) ?>"
+                                            class="form-control"
+                                            data-required="<?= $field['required'] ? '1' : '0' ?>"
+                                            <?= $required ?>>
+
+                                <?php endswitch; ?>
 
                             </div>
 
@@ -196,20 +211,21 @@
 
             <button
                 type="button"
-                class="btn btn-success mt-3"
+                class="btn btn-success"
                 onclick="nextStep()">
 
                 Lanjut
-                <i class="bi bi-arrow-bar-right"></i>
+                <i class="bi bi-arrow-right"></i>
 
             </button>
 
         </div>
 
-        <!-- ================= STEP 2 ================= -->
-        <div id="step-2" class="step d-none">
+        <!-- ===================================================== -->
+        <!-- STEP 2 -->
+        <!-- ===================================================== -->
 
-            <h5 class="mb-3">Kuesioner Step 2</h5>
+        <div id="step-2" class="step d-none">
 
             <?php
 
@@ -217,9 +233,8 @@
 
             foreach ($fields_step2 as $field) {
 
-                $header = !empty($field['header'])
-                    ? $field['header']
-                    : 'Bagian Tanpa Judul';
+                $header = $field['header']
+                    ?: 'Informasi Tambahan';
 
                 $groups2[$header][] = $field;
             }
@@ -228,160 +243,184 @@
 
             <?php foreach ($groups2 as $header => $fields): ?>
 
-                <h5 class="mt-3 mb-3">
-                    <?= esc($header) ?>
-                </h5>
+                <div class="field-group mb-4">
 
-                <div class="row">
+                    <h5 class="mb-3 fw-bold text-success">
+                        <?= esc($header) ?>
+                    </h5>
 
-                    <?php foreach ($fields as $field): ?>
+                    <div class="row">
 
-                        <div class="col-md-6 mb-3 conditional-field"
-                            data-conditional-field="<?= esc($field['conditional_field'] ?? '') ?>"
-                            data-conditional-value="<?= esc($field['conditional_value'] ?? '') ?>"
-                            data-section="<?= esc($field['section_key'] ?? '') ?>">
-
-                            <label class="form-label">
-
-                                <?= esc($field['label']) ?>
-
-                                <?= $field['required'] ? '*' : '' ?>
-
-                            </label>
+                        <?php foreach ($fields as $field): ?>
 
                             <?php
 
-                            $name = esc($field['field_name']);
+                            $name = $field['field_name'];
 
                             $required = $field['required']
                                 ? 'required'
                                 : '';
 
-                            $options = json_decode($field['options'], true);
+                            $options = json_decode(
+                                $field['options'],
+                                true
+                            );
 
-                            switch ($field['type']) {
-
-                                case 'text':
-                                case 'number':
-
-                                    $value = old($name) ?? '';
-
-                                    echo "
-                                    <input
-                                        type='{$field['type']}'
-                                        name='{$name}'
-                                        value='" . esc($value) . "'
-                                        class='form-control'
-                                        {$required}
-                                    >";
-
-                                    break;
-
-                                case 'textarea':
-
-                                    $value = old($name) ?? '';
-
-                                    echo "
-                                    <textarea
-                                        name='{$name}'
-                                        class='form-control'
-                                        rows='3'
-                                        {$required}
-                                    >" . esc($value) . "</textarea>";
-
-                                    break;
-
-                                case 'select':
-
-                                    $selectedValue = old($name) ?? '';
-
-                                    echo "<select name='{$name}' class='form-select' {$required}>";
-
-                                    echo "<option value=''>Pilih</option>";
-
-                                    if (
-                                        !empty($field['source_table']) &&
-                                        isset($select_options[$field['source_table']])
-                                    ) {
-
-                                        foreach ($select_options[$field['source_table']] as $opt) {
-
-                                            $value = esc(
-                                                $opt['value'] ?? array_values($opt)[0]
-                                            );
-
-                                            $label = esc(
-                                                $opt['label'] ?? ($opt[1] ?? $value)
-                                            );
-
-                                            $selected = ($value == $selectedValue)
-                                                ? 'selected'
-                                                : '';
-
-                                            echo "
-                                            <option value='{$value}' {$selected}>
-                                                {$label}
-                                            </option>";
-                                        }
-                                    } elseif (is_array($options)) {
-
-                                        foreach ($options as $opt) {
-
-                                            $selected = ($opt == $selectedValue)
-                                                ? 'selected'
-                                                : '';
-
-                                            echo "
-                                            <option value='" . esc($opt) . "' {$selected}>
-                                                " . esc($opt) . "
-                                            </option>";
-                                        }
-                                    }
-
-                                    echo "</select>";
-
-                                    break;
-
-                                default:
-
-                                    $value = old($name) ?? '';
-
-                                    echo "
-                                    <input
-                                        type='text'
-                                        name='{$name}'
-                                        value='" . esc($value) . "'
-                                        class='form-control'
-                                        {$required}
-                                    >";
-
-                                    break;
-                            }
+                            $value = old($name)
+                                ?? ($tracer[$name] ?? '');
 
                             ?>
 
+                            <div
+                                class="col-md-6 mb-3 conditional-field"
+                                data-conditional-field="<?= esc($field['conditional_field'] ?? '') ?>"
+                                data-conditional-value="<?= esc($field['conditional_value'] ?? '') ?>">
+
+                                <label class="form-label">
+
+                                    <?= esc($field['label']) ?>
+
+                                    <?php if ($field['required']): ?>
+                                        <span class="text-danger">*</span>
+                                    <?php endif; ?>
+
+                                </label>
+
+                                <?php switch ($field['type']):
+
+                                    case 'text':
+                                    case 'number':
+                                    case 'email':
+                                    case 'date':
+                                ?>
+
+                                        <input
+                                            type="<?= esc($field['type']) ?>"
+                                            name="<?= esc($name) ?>"
+                                            value="<?= esc($value) ?>"
+                                            class="form-control"
+                                            data-required="<?= $field['required'] ? '1' : '0' ?>"
+                                            <?= $required ?>>
+
+                                        <?php break; ?>
+
+                                    <?php
+                                    case 'textarea': ?>
+
+                                        <textarea
+                                            name="<?= esc($name) ?>"
+                                            class="form-control"
+                                            rows="3"
+                                            data-required="<?= $field['required'] ? '1' : '0' ?>"
+                                            <?= $required ?>><?= esc($value) ?></textarea>
+
+                                        <?php break; ?>
+
+                                    <?php
+                                    case 'select': ?>
+
+                                        <select
+                                            name="<?= esc($name) ?>"
+                                            class="form-select"
+                                            data-required="<?= $field['required'] ? '1' : '0' ?>"
+                                            <?= $required ?>>
+
+                                            <option value="">
+                                                Pilih
+                                            </option>
+
+                                            <?php if (
+                                                !empty($field['source_table']) &&
+                                                isset($select_options[$field['source_table']])
+                                            ): ?>
+
+                                                <?php foreach ($select_options[$field['source_table']] as $opt):
+
+                                                    $optValue = $opt['value']
+                                                        ?? array_values($opt)[0];
+
+                                                    $optLabel = $opt['label']
+                                                        ?? ($opt[1] ?? $optValue);
+
+                                                ?>
+
+                                                    <option
+                                                        value="<?= esc($optValue) ?>"
+                                                        <?= $optValue == $value ? 'selected' : '' ?>>
+
+                                                        <?= esc($optLabel) ?>
+
+                                                    </option>
+
+                                                <?php endforeach; ?>
+
+                                            <?php elseif (is_array($options)): ?>
+
+                                                <?php foreach ($options as $opt): ?>
+
+                                                    <option
+                                                        value="<?= esc($opt) ?>"
+                                                        <?= $opt == $value ? 'selected' : '' ?>>
+
+                                                        <?= esc($opt) ?>
+
+                                                    </option>
+
+                                                <?php endforeach; ?>
+
+                                            <?php endif; ?>
+
+                                        </select>
+
+                                        <?php break; ?>
+
+                                <?php endswitch; ?>
+
+                            </div>
+
+                        <?php endforeach; ?>
+
+                        <!-- ===================================== -->
+                        <!-- TAMBAHAN ALAMAT PERUSAHAAN -->
+                        <!-- ===================================== -->
+
+                        <div class="col-md-12 mb-3">
+
+                            <label class="form-label">
+                                Alamat Perusahaan
+                            </label>
+
+                            <textarea
+                                name="alamat_perusahaan"
+                                class="form-control"
+                                rows="3"><?= old(
+                                                'alamat_perusahaan',
+                                                $tracer['alamat_perusahaan'] ?? ''
+                                            ) ?></textarea>
+
                         </div>
 
-                    <?php endforeach; ?>
+                    </div>
 
                 </div>
 
             <?php endforeach; ?>
 
-            <div class="d-flex justify-content-between mt-4">
+            <div class="d-flex justify-content-between">
 
                 <button
                     type="button"
                     class="btn btn-secondary"
                     onclick="prevStep()">
 
-                    <i class="bi bi-arrow-bar-left"></i>
+                    <i class="bi bi-arrow-left"></i>
                     Kembali
 
                 </button>
 
                 <button
                     type="submit"
+                    id="submitTracer"
                     class="btn btn-primary">
 
                     Kirim Kuesioner
@@ -397,10 +436,10 @@
 </div>
 
 <script>
-    function nextStep() {
+    function validateStep(stepId) {
 
         const requiredFields = document.querySelectorAll(
-            '#step-1 [required]:not([disabled])'
+            `${stepId} [required]:not([disabled])`
         );
 
         let isValid = true;
@@ -436,30 +475,34 @@
             }
         });
 
-        if (isValid) {
+        return isValid;
+    }
 
-            document
-                .getElementById('step-1')
-                .classList.add('d-none');
+    function nextStep() {
 
-            document
-                .getElementById('step-2')
-                .classList.remove('d-none');
-
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth'
-            });
-
-        } else {
+        if (!validateStep('#step-1')) {
 
             Swal.fire({
                 icon: 'warning',
                 title: 'Lengkapi Data',
-                text: 'Harap lengkapi semua data wajib di Langkah 1 sebelum melanjutkan.',
-                confirmButtonColor: '#3085d6',
+                text: 'Lengkapi seluruh field wajib.',
             });
+
+            return;
         }
+
+        document
+            .getElementById('step-1')
+            .classList.add('d-none');
+
+        document
+            .getElementById('step-2')
+            .classList.remove('d-none');
+
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
     }
 
     function prevStep() {
@@ -477,107 +520,77 @@
             behavior: 'smooth'
         });
     }
-</script>
-<script>
+
     document.addEventListener('DOMContentLoaded', function() {
 
         function toggleConditionalFields() {
 
-            // =========================
-            // TOGGLE CONDITIONAL FIELD
-            // =========================
+            document.querySelectorAll('.conditional-field')
+                .forEach(field => {
 
-            document.querySelectorAll('.conditional-field').forEach(field => {
+                    const conditionalField =
+                        (field.dataset.conditionalField || '').trim();
 
-                const conditionalField = (
-                    field.dataset.conditionalField || ''
-                ).trim();
+                    const conditionalValue =
+                        (field.dataset.conditionalValue || '')
+                        .trim()
+                        .toLowerCase();
 
-                const conditionalValue = (
-                    field.dataset.conditionalValue || ''
-                ).trim().toLowerCase();
+                    if (!conditionalField || !conditionalValue) {
 
-                // jika field tidak conditional
-                if (!conditionalField || !conditionalValue) {
+                        field.classList.remove('d-none');
 
-                    field.classList.remove('d-none');
+                        field.querySelectorAll(
+                            'input, textarea, select'
+                        ).forEach(input => {
 
-                    field.querySelectorAll('input, textarea, select')
-                        .forEach(input => {
                             input.disabled = false;
-                        });
 
-                    return;
-                }
-
-                // field controller
-                const controllerInput = document.querySelector(
-                    `[name="${conditionalField}"]`
-                );
-
-                const selectedValue = controllerInput ?
-                    controllerInput.value.trim().toLowerCase() :
-                    '';
-
-                // tampilkan
-                if (selectedValue === conditionalValue) {
-
-                    field.classList.remove('d-none');
-
-                    field.querySelectorAll('input, textarea, select')
-                        .forEach(input => {
-                            input.disabled = false;
-                        });
-
-                } else {
-
-                    // hidden
-                    field.classList.add('d-none');
-
-                    field.querySelectorAll('input, textarea, select')
-                        .forEach(input => {
-
-                            input.disabled = true;
-
-                            if (
-                                input.type === 'checkbox' ||
-                                input.type === 'radio'
-                            ) {
-
-                                input.checked = false;
-
-                            } else {
-
-                                input.value = '';
+                            if (input.dataset.required === '1') {
+                                input.required = true;
                             }
                         });
-                }
-            });
 
-            // =========================
-            // TOGGLE GROUP HEADER
-            // =========================
+                        return;
+                    }
 
-            document.querySelectorAll('.field-group').forEach(group => {
+                    const controllerInput = document.querySelector(
+                        `[name="${conditionalField}"]`
+                    );
 
-                const visibleFields = group.querySelectorAll(
-                    '.conditional-field:not(.d-none)'
-                );
+                    const selectedValue = controllerInput ?
+                        controllerInput.value.trim().toLowerCase() :
+                        '';
 
-                if (visibleFields.length > 0) {
+                    if (selectedValue === conditionalValue) {
 
-                    group.style.display = '';
+                        field.classList.remove('d-none');
 
-                } else {
+                        field.querySelectorAll(
+                            'input, textarea, select'
+                        ).forEach(input => {
 
-                    group.style.display = 'none';
-                }
-            });
+                            input.disabled = false;
+
+                            if (input.dataset.required === '1') {
+                                input.required = true;
+                            }
+                        });
+
+                    } else {
+
+                        field.classList.add('d-none');
+
+                        field.querySelectorAll(
+                            'input, textarea, select'
+                        ).forEach(input => {
+
+                            input.disabled = true;
+                            input.required = false;
+                        });
+                    }
+                });
         }
-
-        // =========================
-        // EVENT LISTENER
-        // =========================
 
         document.addEventListener('change', function(e) {
 
@@ -590,12 +603,23 @@
             }
         });
 
-        // =========================
-        // INIT
-        // =========================
+        document
+            .getElementById('submitTracer')
+            .addEventListener('click', function(e) {
+
+                if (!validateStep('#step-2')) {
+
+                    e.preventDefault();
+
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Form Belum Lengkap',
+                        text: 'Lengkapi seluruh data wajib.',
+                    });
+                }
+            });
 
         toggleConditionalFields();
-
     });
 </script>
 

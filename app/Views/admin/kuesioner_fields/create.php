@@ -66,6 +66,32 @@
         <input type="number" id="order" name="order" value="<?= old('order') ?? 0 ?>" class="form-control" required>
     </div>
 
+    <div class="mb-3">
+        <label class="form-label">
+            Conditional Field
+        </label>
+
+        <input
+            type="text"
+            name="conditional_field"
+            class="form-control"
+            value="<?= old('conditional_field') ?>"
+            placeholder="contoh: status_pekerjaan">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">
+            Conditional Value
+        </label>
+
+        <input
+            type="text"
+            name="conditional_value"
+            class="form-control"
+            value="<?= old('conditional_value') ?>"
+            placeholder="contoh: bekerja">
+    </div>
+
     <button type="submit" class="btn btn-success">Simpan Field</button>
     <a href="<?= base_url('admin/kuesionerfields') ?>" class="btn btn-secondary">Batal</a>
 </form>

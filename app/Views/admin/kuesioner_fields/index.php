@@ -960,13 +960,18 @@
 
                                         </a>
 
-                                        <a href="<?= base_url('admin/kuesionerfields/delete/' . $f['id']) ?>"
-                                            class="btn-action btn-delete btn-delete-confirm"
-                                            title="Hapus Field">
 
-                                            <i class="bi bi-trash-fill"></i>
+                                        <?php if (!in_array($f['field_name'], $protectedFields)): ?>
 
-                                        </a>
+                                            <a href="<?= base_url('admin/kuesionerfields/delete/' . $f['id']) ?>"
+                                                class="btn-action btn-delete btn-delete-confirm"
+                                                title="Hapus Field">
+
+                                                <i class="bi bi-trash-fill"></i>
+
+                                            </a>
+
+                                        <?php endif; ?>
 
                                     </div>
 

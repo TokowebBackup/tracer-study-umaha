@@ -460,106 +460,93 @@
 
 <script src="https://code.highcharts.com/highcharts.js"></script>
 
-<script>
-    Highcharts.chart('pieStatus', {
+<?php if (!empty($grafik)): ?>
 
-        chart: {
-            type: 'pie',
-            backgroundColor: 'transparent'
-        },
+    <script>
+        Highcharts.chart('pieStatus', {
 
-        title: {
-            text: null
-        },
+            chart: {
+                type: 'pie',
+                backgroundColor: 'transparent'
+            },
 
-        tooltip: {
-            pointFormat: '<b>{point.y} Alumni</b>'
-        },
-
-        accessibility: {
-            point: {
-                valueSuffix: '%'
-            }
-        },
-
-        plotOptions: {
-
-            pie: {
-                allowPointSelect: true,
-                cursor: 'pointer',
-                borderRadius: 8,
-                dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b><br>{point.y}'
-                }
-            }
-        },
-
-        series: [{
-            name: 'Jumlah',
-            colorByPoint: true,
-            data: [{
-                    name: 'Bekerja',
-                    y: <?= $grafik['bekerja'] ?>
-                },
-                {
-                    name: 'Wirausaha',
-                    y: <?= $grafik['wirausaha'] ?>
-                },
-                {
-                    name: 'Belum Bekerja',
-                    y: <?= $grafik['belum_bekerja'] ?>
-                },
-                {
-                    name: 'Studi Lanjut',
-                    y: <?= $grafik['studi_lanjut'] ?>
-                }
-            ]
-        }]
-    });
-
-    Highcharts.chart('barAlumniTahun', {
-
-        chart: {
-            type: 'column',
-            backgroundColor: 'transparent'
-        },
-
-        title: {
-            text: null
-        },
-
-        xAxis: {
-            categories: [
-                <?= implode(',', array_map(fn($t) => "'" . $t['tahun'] . "'", $alumni_per_tahun)) ?>
-            ],
-            crosshair: true
-        },
-
-        yAxis: {
-            min: 0,
             title: {
-                text: 'Jumlah Alumni'
-            }
-        },
+                text: null
+            },
 
-        tooltip: {
-            shared: true
-        },
+            series: [{
+                name: 'Jumlah',
+                colorByPoint: true,
+                data: [{
+                        name: 'Bekerja',
+                        y: <?= $grafik['bekerja'] ?? 0 ?>
+                    },
+                    {
+                        name: 'Wirausaha',
+                        y: <?= $grafik['wirausaha'] ?? 0 ?>
+                    },
+                    {
+                        name: 'Belum Bekerja',
+                        y: <?= $grafik['belum_bekerja'] ?? 0 ?>
+                    },
+                    {
+                        name: 'Studi Lanjut',
+                        y: <?= $grafik['studi_lanjut'] ?? 0 ?>
+                    }
+                ]
+            }]
+        });
+    </script>
 
-        plotOptions: {
-            column: {
-                borderRadius: 8
-            }
-        },
+<?php else: ?>
 
-        series: [{
-            name: 'Alumni',
-            data: [
-                <?= implode(',', array_map(fn($t) => $t['jumlah'], $alumni_per_tahun)) ?>
-            ]
-        }]
-    });
-</script>
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-pie-chart fs-1"></i>
+        <p class="mt-3 mb-0">
+            Belum ada data tracer untuk ditampilkan.
+        </p>
+    </div>
+
+<?php endif; ?>
+
+<?php if (!empty($alumni_per_tahun)): ?>
+
+    <script>
+        Highcharts.chart('barAlumniTahun', {
+
+            chart: {
+                type: 'column',
+                backgroundColor: 'transparent'
+            },
+
+            title: {
+                text: null
+            },
+
+            xAxis: {
+                categories: [
+                    <?= implode(',', array_map(fn($t) => "'" . $t['tahun'] . "'", $alumni_per_tahun)) ?>
+                ]
+            },
+
+            series: [{
+                name: 'Alumni',
+                data: [
+                    <?= implode(',', array_map(fn($t) => $t['jumlah'], $alumni_per_tahun)) ?>
+                ]
+            }]
+        });
+    </script>
+
+<?php else: ?>
+
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-bar-chart fs-1"></i>
+        <p class="mt-3 mb-0">
+            Belum ada data alumni per tahun.
+        </p>
+    </div>
+
+<?php endif; ?>
 
 <?= $this->endSection() ?>

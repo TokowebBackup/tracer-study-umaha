@@ -235,6 +235,128 @@
     </div>
 
     <?php if ($tracer): ?>
+
+        <?php
+
+        $showRequestForm = true;
+
+        if (
+            $penggunaRequest &&
+            (
+                (int)$penggunaRequest['is_sent'] === 1 ||
+                (int)$penggunaRequest['is_submitted'] === 1
+            )
+        ) {
+
+            $showRequestForm = false;
+        }
+
+        ?>
+
+        <?php if ($showRequestForm): ?>
+
+            <div class="card modern-card mb-4">
+
+                <div class="card-header bg-warning text-dark">
+
+                    <i class="bi bi-send-check-fill me-2"></i>
+                    Request Penilaian Pengguna
+
+                </div>
+
+                <div class="card-body">
+
+                    <p class="text-muted">
+                        Kirim form penilaian ke HRD, atasan,
+                        atau perusahaan tempat Anda bekerja.
+                    </p>
+
+                    <form
+                        action="<?= base_url('alumni/request-pengguna/generate') ?>"
+                        method="post">
+
+                        <?= csrf_field() ?>
+
+                        <div class="mb-3">
+
+                            <label class="form-label">
+                                Nomor WhatsApp HR / Atasan
+                            </label>
+
+                            <input
+                                type="text"
+                                name="whatsapp"
+                                class="form-control"
+                                placeholder="Contoh: 628123456789"
+                                required>
+
+                            <small class="text-muted">
+                                Gunakan format 62 tanpa tanda +
+                            </small>
+
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-umaha">
+
+                            <i class="bi bi-whatsapp"></i>
+                            Generate & Kirim WhatsApp
+
+                        </button>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+        <?php else: ?>
+
+            <div class="card modern-card mb-4">
+
+                <div class="card-header bg-success text-white">
+
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    Status Penilaian Pengguna
+
+                </div>
+
+                <div class="card-body">
+
+                    <?php if (
+                        $penggunaRequest &&
+                        (int)$penggunaRequest['is_submitted'] === 1
+                    ): ?>
+
+                        <div class="alert alert-success mb-0">
+
+                            <i class="bi bi-patch-check-fill me-2"></i>
+
+                            Penilaian pengguna sudah berhasil diisi.
+
+                        </div>
+
+                    <?php else: ?>
+
+                        <div class="alert alert-info mb-0">
+
+                            <i class="bi bi-send-check-fill me-2"></i>
+
+                            Link penilaian pengguna sudah berhasil dikirim
+                            dan sedang menunggu pengisian.
+
+                        </div>
+
+                    <?php endif; ?>
+
+                </div>
+
+            </div>
+
+        <?php endif; ?>
+
+
         <div class="card modern-card mb-4">
 
             <div class="card-header bg-info text-white d-flex justify-content-between align-items-center flex-wrap">

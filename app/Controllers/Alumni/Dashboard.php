@@ -67,13 +67,25 @@ class Dashboard extends BaseController
         }
 
         // =========================
+        // REQUEST PENGGUNA
+        // =========================
+
+        $requestModel = new \App\Models\PenggunaRequestModel();
+
+        $penggunaRequest = $requestModel
+            ->where('alumni_id', $alumni['id'])
+            ->orderBy('created_at', 'DESC')
+            ->first();
+
+        // =========================
         // RETURN VIEW
         // =========================
 
         return view('alumni/dashboard', [
-            'alumni'        => $alumni,
-            'tracer'        => $tracer,
-            'groupedFields' => $groupedFields,
+            'alumni'          => $alumni,
+            'tracer'          => $tracer,
+            'groupedFields'   => $groupedFields,
+            'penggunaRequest' => $penggunaRequest,
         ]);
     }
 }

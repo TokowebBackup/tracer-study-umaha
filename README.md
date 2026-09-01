@@ -182,6 +182,23 @@ ADD updated_at TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP
 ON UPDATE CURRENT_TIMESTAMP;
 ``` 
 
+##### Clean Data Tracer
+```
+SET FOREIGN_KEY_CHECKS = 0;
+
+DELETE FROM pengguna_lulusan_detail;
+DELETE FROM pengguna_lulusan;
+DELETE FROM pengguna_request;
+DELETE FROM tracer_study;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+ALTER TABLE pengguna_lulusan_detail AUTO_INCREMENT = 1;
+ALTER TABLE pengguna_lulusan AUTO_INCREMENT = 1;
+ALTER TABLE pengguna_request AUTO_INCREMENT = 1;
+ALTER TABLE tracer_study AUTO_INCREMENT = 1;
+
+```
 
 
 

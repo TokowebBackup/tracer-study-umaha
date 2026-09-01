@@ -20,6 +20,7 @@ $routes->get('auth/logout', 'Auth::logout');
 $routes->get('kuesioner/alumni', 'KuesionerAlumni::index', ['filter' => 'auth']);
 $routes->post('kuesioner/alumni/simpan', 'KuesionerAlumni::simpan');
 $routes->get('kuesioner/pengguna', 'KuesionerPengguna::index');
+$routes->get('kuesioner/pengguna/(:any)', 'KuesionerPengguna::index/$1');
 $routes->post('kuesioner/pengguna/simpan', 'KuesionerPengguna::simpan');
 $routes->get('laporan/alumni', 'Rekap::tracer');
 $routes->get('laporan/pengguna', 'Rekap::pengguna');
@@ -54,6 +55,8 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     // Pengguna
     $routes->get('pengguna', 'Admin\Pengguna::index');
     $routes->get('pengguna/cetak', 'Admin\Pengguna::cetak');
+    // Monitoring Request Pengguna
+    $routes->get('pengguna-request', 'Admin\PenggunaRequest::index');
 
     // Tracer
     $routes->get('tracer', 'Admin\Tracer::index');
@@ -61,6 +64,7 @@ $routes->group('admin', ['filter' => 'admin'], function ($routes) {
     $routes->get('tracer/delete/(:num)', 'Admin\Tracer::delete/$1');
     $routes->get('tracer/export/all', 'Admin\Tracer::exportAll');
     $routes->get('tracer/export/(:num)', 'Admin\Tracer::exportSingle/$1');
+    $routes->get('tracer/request-pengguna/(:num)', 'Admin\Tracer::requestPengguna/$1');
 
     // Setting & Panduan
     $routes->get('periode', 'Admin\Periode::index');
@@ -102,6 +106,10 @@ $routes->get('alumni/dashboard', 'Alumni\Dashboard::index', ['filter' => 'auth']
 // Fitur edit tracer study oleh alumni
 $routes->get('alumni/tracer/edit', 'Alumni\Tracer::edit', ['filter' => 'auth']);
 $routes->post('alumni/tracer/update', 'Alumni\Tracer::update', ['filter' => 'auth']);
+
+$routes->get('alumni/request-pengguna', 'Alumni\\PenggunaRequest::index', ['filter' => 'auth']);
+
+$routes->post('alumni/request-pengguna/generate', 'Alumni\\PenggunaRequest::generate', ['filter' => 'auth']);
 
 
 $routes->get('test', 'Test::index');

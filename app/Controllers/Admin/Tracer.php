@@ -3,48 +3,94 @@
 namespace App\Controllers\Admin;
 
 use App\Controllers\BaseController;
+use App\Models\TracerModel;
+use App\Models\KuesionerFieldModel;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use App\Models\TracerModel;
-use App\Models\AlumniModel;
+use App\Models\PenggunaRequestModel;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 
 class Tracer extends BaseController
 {
     protected $tracerModel;
-    protected $alumniModel;
+    protected $fieldModel;
+
+    protected array $defaultFields = [
+        'nama' => 'Nama',
+        'nim' => 'NIM',
+        'nama_prodi' => 'Program Studi',
+        'jenjang' => 'Jenjang',
+    ];
 
     public function __construct()
     {
         $this->tracerModel = new TracerModel();
-        $this->alumniModel = new AlumniModel();
+        $this->fieldModel = new KuesionerFieldModel();
     }
 
-    // ==============================
-    // ✅ 1. LIST DATA TRACER STUDY
-    // ==============================
+    // =========================================================
+    // INDEX
+    // =========================================================
     public function index()
     {
         $data['title'] = 'Data Tracer Study';
 
-        $data['tracers'] = $this->tracerModel
-            ->select('tracer_study.*, alumni.nama, alumni.nim, prodi.nama_prodi, prodi.jenjang')
+        $requestModel = new PenggunaRequestModel();
+
+        $tracers = $this->tracerModel
+            ->select('
+        tracer_study.*,
+        alumni.nama,
+        alumni.nim,
+        prodi.nama_prodi,
+        prodi.jenjang
+    ')
             ->join('alumni', 'alumni.id = tracer_study.alumni_id', 'left')
             ->join('prodi', 'prodi.kode_prodi = alumni.program_studi', 'left')
             ->orderBy('tracer_study.created_at', 'DESC')
             ->findAll();
 
+        foreach ($tracers as &$tracer) {
+
+            $request = $requestModel
+                ->where('alumni_id', $tracer['alumni_id'])
+                ->orderBy('id', 'DESC')
+                ->first();
+
+            $tracer['pengguna_request'] = $request;
+        }
+
+        $data['tracers'] = $tracers;
+
         return view('admin/tracer/index', $data);
     }
 
-    // ==============================
-    // ✅ 2. DETAIL DATA TRACER STUDY
-    // ==============================
+    // =========================================================
+    // DETAIL
+    // =========================================================
     public function detail($id)
     {
         $tracer = $this->tracerModel
-            ->select('tracer_study.*, alumni.nama, alumni.nim, alumni.email, prodi.nama_prodi, prodi.jenjang')
-            ->join('alumni', 'alumni.id = tracer_study.alumni_id', 'left')
-            ->join('prodi', 'prodi.kode_prodi = alumni.program_studi', 'left')
+            ->select('
+            tracer_study.*,
+            alumni.nama,
+            alumni.nim,
+            alumni.email,
+            prodi.nama_prodi,
+            prodi.jenjang
+        ')
+            ->join(
+                'alumni',
+                'alumni.id = tracer_study.alumni_id',
+                'left'
+            )
+            ->join(
+                'prodi',
+                'prodi.kode_prodi = alumni.program_studi',
+                'left'
+            )
             ->where('tracer_study.id', $id)
             ->first();
 
@@ -52,410 +98,439 @@ class Tracer extends BaseController
 
             return redirect()
                 ->to(base_url('admin/tracer'))
-                ->with('error', 'Data tidak ditemukan.');
+                ->with(
+                    'error',
+                    'Data tidak ditemukan.'
+                );
         }
 
-        // =========================
-        // FIELD DINAMIS
-        // =========================
+        // =====================================================
+        // FIELD VIRTUAL
+        // =====================================================
 
-        $fieldModel = new \App\Models\KuesionerFieldModel();
+        $tracer['program_studi'] =
+            $tracer['nama_prodi'] ?? '-';
 
-        $allFields = $fieldModel
+        $tracer['nama'] =
+            $tracer['nama'] ?? '-';
+
+        $tracer['nim'] =
+            $tracer['nim'] ?? '-';
+
+        // =====================================================
+        // GET FIELD
+        // =====================================================
+
+        $fields = $this->fieldModel
             ->orderBy('step', 'ASC')
             ->orderBy('order', 'ASC')
             ->findAll();
 
         $groupedFields = [];
 
-        foreach ($allFields as $field) {
+        foreach ($fields as $field) {
 
-            $header = $field['header'] ?: 'Informasi Lain';
+            $header =
+                $field['header']
+                ?: 'Informasi Lain';
 
             $groupedFields[$header][] = $field;
         }
 
         return view('admin/tracer/detail', [
+
             'tracer' => $tracer,
+
             'groupedFields' => $groupedFields,
+
         ]);
     }
 
-    // ==============================
-    // ✅ 3. HAPUS DATA TRACER STUDY
-    // ==============================
+    // =========================================================
+    // DELETE
+    // =========================================================
     public function delete($id)
     {
         $this->tracerModel->delete($id);
-        return redirect()->to(base_url('admin/tracer'))->with('success', 'Data tracer study berhasil dihapus.');
+
+        return redirect()
+            ->to(base_url('admin/tracer'))
+            ->with('success', 'Data berhasil dihapus.');
     }
 
+    // =========================================================
+    // EXPORT ALL
+    // =========================================================
     public function exportAll()
     {
-        $data = $this->tracerModel
-            ->select('tracer_study.*, alumni.nama, alumni.nim, prodi.nama_prodi, prodi.jenjang')
-            ->join('alumni', 'alumni.id = tracer_study.alumni_id', 'left')
-            ->join('prodi', 'prodi.kode_prodi = alumni.program_studi', 'left')
-            ->orderBy('tracer_study.created_at', 'DESC')
-            ->findAll();
+        $data = $this->getExportData();
 
-        $spreadsheet = new \PhpOffice\PhpSpreadsheet\Spreadsheet();
+        if (!$data) {
 
-        // =============================
-        // 🧾 SHEET 1 — Data Alumni
-        // =============================
-        $sheet1 = $spreadsheet->getActiveSheet();
-        $sheet1->setTitle('Data Alumni');
-
-        $headers1 = [
-            'No',
-            'Nama',
-            'NIM',
-            'Prodi',
-            'Jenjang',
-            'Tahun Pengisian',
-            'Tahun Lulus',
-            'Status Pekerjaan',
-            'Institusi',
-            'Posisi',
-            'Tahun Mulai Bekerja',
-            'Gaji Pertama',
-            'Tempat Kerja (Kabupaten)',
-            'Sektor',
-            'Sesuai Bidang',
-            'Dapat Kerja Sebelum Lulus',
-            'Cara Mendapat Kerja',
-            'Relevansi Kurikulum',
-            'Saran Kurikulum',
-            'Harapan UMAHA',
-            'Domisili Alumni',
-            'Bulan Mulai Mencari Pekerjaan',
-            'Created At'
-        ];
-
-        // Header
-        $col = 'A';
-        foreach ($headers1 as $h) {
-            $sheet1->setCellValue($col . '1', $h);
-            $col++;
-        }
-
-        // Data
-        $row = 2;
-        $no = 1;
-        foreach ($data as $d) {
-            $col = 'A';
-            $sheet1->setCellValue($col++ . $row, $no++);
-            $sheet1->setCellValue($col++ . $row, $d['nama']);
-            $sheet1->setCellValue($col++ . $row, $d['nim']);
-            $sheet1->setCellValue($col++ . $row, $d['nama_prodi']);
-            $sheet1->setCellValue($col++ . $row, $d['jenjang']);
-            $sheet1->setCellValue($col++ . $row, $d['tahun_pengisian']);
-            $sheet1->setCellValue($col++ . $row, $d['tahun_lulus']);
-            $sheet1->setCellValue($col++ . $row, $d['status_pekerjaan']);
-            $sheet1->setCellValue($col++ . $row, $d['institusi_bekerja']);
-            $sheet1->setCellValue($col++ . $row, $d['posisi_pekerjaan']);
-            $sheet1->setCellValue($col++ . $row, $d['tahun_mulai_bekerja']);
-            $sheet1->setCellValue($col++ . $row, $d['gaji_pertama']);
-            $sheet1->setCellValue($col++ . $row, $d['tempat_kerja_kabupaten']);
-            $sheet1->setCellValue($col++ . $row, $d['sektor_tempat_kerja']);
-            $sheet1->setCellValue($col++ . $row, $d['sesuai_bidang']);
-            $sheet1->setCellValue($col++ . $row, $d['dapat_kerja_sebelum_lulus']);
-            $sheet1->setCellValue($col++ . $row, $d['cara_mendapat_kerja']);
-            $sheet1->setCellValue($col++ . $row, $d['relevansi_kurikulum']);
-            $sheet1->setCellValue($col++ . $row, $d['saran_kurikulum']);
-            $sheet1->setCellValue($col++ . $row, $d['harapan_umaha']);
-            $sheet1->setCellValue($col++ . $row, $d['domisili_alumni']);
-            $sheet1->setCellValue($col++ . $row, $d['bulan_mulai_mencari_pekerjaan']);
-            $sheet1->setCellValue($col++ . $row, $d['created_at']);
-            $row++;
-        }
-
-        // Auto width
-        foreach (range('A', $sheet1->getHighestColumn()) as $col) {
-            $sheet1->getColumnDimension($col)->setAutoSize(true);
-        }
-
-        // Border
-        $styleArray = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
-        $sheet1->getStyle('A1:' . $sheet1->getHighestColumn() . ($row - 1))->applyFromArray($styleArray);
-
-
-        // =============================
-        // 🧮 SHEET 2 — Penilaian & Evaluasi
-        // =============================
-        $sheet2 = $spreadsheet->createSheet();
-        $sheet2->setTitle('Penilaian');
-
-        $headers2 = [
-            'No',
-            'Nama',
-            'NIM',
-            'Prodi',
-            'Jenjang',
-            'Kepuasan Etika',
-            'Kepuasan Bidang Ilmu',
-            'Kepuasan Bahasa Asing',
-            'Kepuasan Teknologi Informasi',
-            'Kepuasan Komunikasi',
-            'Kepuasan Kerjasama',
-            'Kepuasan Pengembangan Diri'
-        ];
-
-        // Header
-        $col = 'A';
-        foreach ($headers2 as $h) {
-            $sheet2->setCellValue($col . '1', $h);
-            $col++;
-        }
-
-        // Data
-        $row = 2;
-        $no = 1;
-        foreach ($data as $d) {
-            $col = 'A';
-            $sheet2->setCellValue($col++ . $row, $no++);
-            $sheet2->setCellValue($col++ . $row, $d['nama']);
-            $sheet2->setCellValue($col++ . $row, $d['nim']);
-            $sheet2->setCellValue($col++ . $row, $d['nama_prodi']);
-            $sheet2->setCellValue($col++ . $row, $d['jenjang']);
-            $sheet2->setCellValue($col++ . $row, $d['kepuasan_etika']);
-            $sheet2->setCellValue($col++ . $row, $d['kepuasan_keahlian_bidan_ilmu']);
-            $sheet2->setCellValue($col++ . $row, $d['kepuasan_bahasa_asing']);
-            $sheet2->setCellValue($col++ . $row, $d['kepuasan_teknologi_informasi']);
-            $sheet2->setCellValue($col++ . $row, $d['kepuasan_komunikasi']);
-            $sheet2->setCellValue($col++ . $row, $d['kepuasan_kerjasama']);
-            $sheet2->setCellValue($col++ . $row, $d['kepuasan_pengembangan_diri']);
-            $row++;
-        }
-
-        // Auto width + border
-        foreach (range('A', $sheet2->getHighestColumn()) as $col) {
-            $sheet2->getColumnDimension($col)->setAutoSize(true);
-        }
-        $sheet2->getStyle('A1:' . $sheet2->getHighestColumn() . ($row - 1))->applyFromArray($styleArray);
-
-        // =============================
-        // 📊 SHEET 3 — Summary Statistik
-        // =============================
-        $sheet3 = $spreadsheet->createSheet();
-        $sheet3->setTitle('Summary');
-
-        // Header
-        $sheet3->setCellValue('A1', 'Aspek Penilaian');
-        $sheet3->setCellValue('B1', 'Rata-rata');
-
-        // Hitung rata-rata
-        $total = [
-            'kepuasan_etika' => 0,
-            'kepuasan_keahlian_bidan_ilmu' => 0,
-            'kepuasan_bahasa_asing' => 0,
-            'kepuasan_teknologi_informasi' => 0,
-            'kepuasan_komunikasi' => 0,
-            'kepuasan_kerjasama' => 0,
-            'kepuasan_pengembangan_diri' => 0,
-        ];
-        $count = count($data);
-
-        foreach ($data as $d) {
-            foreach ($total as $k => $v) {
-                $total[$k] += (int) $d[$k];
-            }
-        }
-
-        if ($count > 0) {
-            foreach ($total as $k => &$v) {
-                $v = round($v / $count, 2);
-            }
-        }
-
-        $labels = [
-            'kepuasan_etika' => 'Kepuasan Etika',
-            'kepuasan_keahlian_bidan_ilmu' => 'Kepuasan Bidang Ilmu',
-            'kepuasan_bahasa_asing' => 'Kepuasan Bahasa Asing',
-            'kepuasan_teknologi_informasi' => 'Kepuasan Teknologi Informasi',
-            'kepuasan_komunikasi' => 'Kepuasan Komunikasi',
-            'kepuasan_kerjasama' => 'Kepuasan Kerjasama',
-            'kepuasan_pengembangan_diri' => 'Kepuasan Pengembangan Diri'
-        ];
-
-        // Isi data summary
-        $row = 2;
-        foreach ($labels as $key => $label) {
-            $sheet3->setCellValue('A' . $row, $label);
-            $sheet3->setCellValue('B' . $row, $total[$key]);
-            $row++;
-        }
-
-        // Format kolom
-        $sheet3->getColumnDimension('A')->setAutoSize(true);
-        $sheet3->getColumnDimension('B')->setAutoSize(true);
-        $sheet3->getStyle('A1:B1')->getFont()->setBold(true);
-        $sheet3->getStyle('A1:B' . ($row - 1))->applyFromArray($styleArray);
-
-
-        // =============================
-        // 💾 OUTPUT FILE
-        // =============================
-        $filename = 'TracerStudy_All_' . date('Ymd_His') . '.xlsx';
-        $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
-
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
-        $writer->save('php://output');
-        exit;
-    }
-
-    public function exportSingle($id)
-    {
-        $d = $this->tracerModel
-            ->select('tracer_study.*, alumni.nama, alumni.nim, prodi.nama_prodi, prodi.jenjang')
-            ->join('alumni', 'alumni.id = tracer_study.alumni_id', 'left')
-            ->join('prodi', 'prodi.kode_prodi = alumni.program_studi', 'left')
-            ->where('tracer_study.id', $id)
-            ->first();
-
-        if (!$d) {
-            return redirect()->to(base_url('admin/tracer'))->with('error', 'Data tidak ditemukan.');
+            return redirect()
+                ->back()
+                ->with('error', 'Data tidak ditemukan.');
         }
 
         $spreadsheet = new Spreadsheet();
-        $styleArray = [
-            'borders' => [
-                'allBorders' => [
-                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN,
-                    'color' => ['argb' => 'FF000000'],
-                ],
-            ],
-        ];
 
-        // =============================
-        // 🧾 SHEET 1 — Data Alumni
-        // =============================
-        $sheet1 = $spreadsheet->getActiveSheet();
-        $sheet1->setTitle('Data Alumni');
+        $sheet = $spreadsheet->getActiveSheet();
 
-        $headers1 = [
-            'Nama',
-            'NIM',
-            'Prodi',
-            'Jenjang',
-            'Tahun Pengisian',
-            'Tahun Lulus',
-            'Status Pekerjaan',
-            'Institusi Bekerja',
-            'Posisi Pekerjaan',
-            'Tahun Mulai Bekerja',
-            'Gaji Pertama',
-            'Tempat Kerja (Kabupaten)',
-            'Sektor Tempat Kerja',
-            'Sesuai Bidang',
-            'Dapat Kerja Sebelum Lulus',
-            'Cara Mendapat Kerja',
-            'Relevansi Kurikulum',
-            'Saran Kurikulum',
-            'Harapan UMAHA',
-            'Domisili Alumni',
-            'Bulan Mulai Mencari Pekerjaan',
-            'Created At'
-        ];
+        $sheet->setTitle('Tracer Study');
+
+        $dynamicFields = $this->fieldModel
+            ->orderBy('step', 'ASC')
+            ->orderBy('order', 'ASC')
+            ->findAll();
+
+        // =====================================================
+        // HEADER
+        // =====================================================
+
+        $headers = array_values($this->defaultFields);
+
+        foreach ($dynamicFields as $field) {
+
+            $headers[] = $field['label'];
+        }
+
+        $headers[] = 'Created At';
 
         $col = 'A';
-        foreach ($headers1 as $h) {
-            $sheet1->setCellValue($col . '1', $h);
+
+        foreach ($headers as $header) {
+
+            $sheet->setCellValue(
+                $col . '1',
+                $header
+            );
+
             $col++;
         }
 
-        $row = 2;
-        $col = 'A';
-        $sheet1->setCellValue($col++ . $row, $d['nama']);
-        $sheet1->setCellValue($col++ . $row, $d['nim']);
-        $sheet1->setCellValue($col++ . $row, $d['nama_prodi']);
-        $sheet1->setCellValue($col++ . $row, $d['jenjang']);
-        $sheet1->setCellValue($col++ . $row, $d['tahun_pengisian']);
-        $sheet1->setCellValue($col++ . $row, $d['tahun_lulus']);
-        $sheet1->setCellValue($col++ . $row, $d['status_pekerjaan']);
-        $sheet1->setCellValue($col++ . $row, $d['institusi_bekerja']);
-        $sheet1->setCellValue($col++ . $row, $d['posisi_pekerjaan']);
-        $sheet1->setCellValue($col++ . $row, $d['tahun_mulai_bekerja']);
-        $sheet1->setCellValue($col++ . $row, $d['gaji_pertama']);
-        $sheet1->setCellValue($col++ . $row, $d['tempat_kerja_kabupaten']);
-        $sheet1->setCellValue($col++ . $row, $d['sektor_tempat_kerja']);
-        $sheet1->setCellValue($col++ . $row, $d['sesuai_bidang']);
-        $sheet1->setCellValue($col++ . $row, $d['dapat_kerja_sebelum_lulus']);
-        $sheet1->setCellValue($col++ . $row, $d['cara_mendapat_kerja']);
-        $sheet1->setCellValue($col++ . $row, $d['relevansi_kurikulum']);
-        $sheet1->setCellValue($col++ . $row, $d['saran_kurikulum']);
-        $sheet1->setCellValue($col++ . $row, $d['harapan_umaha']);
-        $sheet1->setCellValue($col++ . $row, $d['domisili_alumni']);
-        $sheet1->setCellValue($col++ . $row, $d['bulan_mulai_mencari_pekerjaan']);
-        $sheet1->setCellValue($col++ . $row, $d['created_at']);
+        // =====================================================
+        // HEADER STYLING
+        // =====================================================
 
-        foreach (range('A', $sheet1->getHighestColumn()) as $col) {
-            $sheet1->getColumnDimension($col)->setAutoSize(true);
-        }
-        $sheet1->getStyle('A1:' . $sheet1->getHighestColumn() . $row)->applyFromArray($styleArray);
+        $headerRange =
+            'A1:' . $sheet->getHighestColumn() . '1';
 
-        // =============================
-        // 🧠 SHEET 2 — Penilaian & Evaluasi
-        // =============================
-        $sheet2 = $spreadsheet->createSheet();
-        $sheet2->setTitle('Penilaian');
+        $sheet->getStyle($headerRange)
+            ->getFont()
+            ->setBold(true);
 
-        $headers2 = [
-            'Nama',
-            'NIM',
-            'Prodi',
-            'Jenjang',
-            'Kepuasan Etika',
-            'Kepuasan Bidang Ilmu',
-            'Kepuasan Bahasa Asing',
-            'Kepuasan Teknologi Informasi',
-            'Kepuasan Komunikasi',
-            'Kepuasan Kerjasama',
-            'Kepuasan Pengembangan Diri'
-        ];
+        $sheet->getStyle($headerRange)
+            ->getFont()
+            ->getColor()
+            ->setARGB('FFFFFFFF');
 
-        $col = 'A';
-        foreach ($headers2 as $h) {
-            $sheet2->setCellValue($col . '1', $h);
-            $col++;
-        }
+        $sheet->getStyle($headerRange)
+            ->getFill()
+            ->setFillType(
+                \PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID
+            )
+            ->getStartColor()
+            ->setARGB('009966');
+
+        // =====================================================
+        // DATA
+        // =====================================================
 
         $row = 2;
-        $col = 'A';
-        $sheet2->setCellValue($col++ . $row, $d['nama']);
-        $sheet2->setCellValue($col++ . $row, $d['nim']);
-        $sheet2->setCellValue($col++ . $row, $d['nama_prodi']);
-        $sheet2->setCellValue($col++ . $row, $d['jenjang']);
-        $sheet2->setCellValue($col++ . $row, $d['kepuasan_etika']);
-        $sheet2->setCellValue($col++ . $row, $d['kepuasan_keahlian_bidan_ilmu']);
-        $sheet2->setCellValue($col++ . $row, $d['kepuasan_bahasa_asing']);
-        $sheet2->setCellValue($col++ . $row, $d['kepuasan_teknologi_informasi']);
-        $sheet2->setCellValue($col++ . $row, $d['kepuasan_komunikasi']);
-        $sheet2->setCellValue($col++ . $row, $d['kepuasan_kerjasama']);
-        $sheet2->setCellValue($col++ . $row, $d['kepuasan_pengembangan_diri']);
 
-        foreach (range('A', $sheet2->getHighestColumn()) as $col) {
-            $sheet2->getColumnDimension($col)->setAutoSize(true);
+        foreach ($data as $d) {
+
+            $col = 'A';
+
+            // default fields
+            foreach (
+                array_keys($this->defaultFields)
+                as $fieldKey
+            ) {
+
+                $sheet->setCellValue(
+                    $col++ . $row,
+                    $d[$fieldKey] ?? ''
+                );
+            }
+
+            // dynamic fields
+            foreach ($dynamicFields as $field) {
+
+                $fieldName = $field['field_name'];
+
+                $value = $d[$fieldName] ?? '';
+
+                $sheet->setCellValue(
+                    $col++ . $row,
+                    $value
+                );
+            }
+
+            $sheet->setCellValue(
+                $col++ . $row,
+                $d['created_at'] ?? ''
+            );
+
+            $row++;
         }
-        $sheet2->getStyle('A1:' . $sheet2->getHighestColumn() . $row)->applyFromArray($styleArray);
 
-        // =============================
-        // 💾 OUTPUT FILE
-        // =============================
-        $filename = 'Tracer_' . preg_replace('/[^A-Za-z0-9]/', '_', $d['nama']) . '.xlsx';
+        // =====================================================
+        // AUTO SIZE COLUMN
+        // =====================================================
+
+        $highestColumn = $sheet->getHighestColumn();
+
+        $highestColumnIndex =
+            \PhpOffice\PhpSpreadsheet\Cell\Coordinate::columnIndexFromString(
+                $highestColumn
+            );
+
+        for (
+            $col = 1;
+            $col <= $highestColumnIndex;
+            $col++
+        ) {
+
+            $columnLetter =
+                \PhpOffice\PhpSpreadsheet\Cell\Coordinate::stringFromColumnIndex(
+                    $col
+                );
+
+            $sheet
+                ->getColumnDimension($columnLetter)
+                ->setAutoSize(true);
+        }
+
+        // =====================================================
+        // BORDER TABLE
+        // =====================================================
+
+        $tableRange =
+            'A1:' .
+            $sheet->getHighestColumn() .
+            $sheet->getHighestRow();
+
+        $sheet->getStyle($tableRange)
+            ->getBorders()
+            ->getAllBorders()
+            ->setBorderStyle(
+                \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN
+            );
+
+        // =====================================================
+        // FREEZE HEADER
+        // =====================================================
+
+        $sheet->freezePane('A2');
+
+        // =====================================================
+        // DOWNLOAD
+        // =====================================================
+
+        $filename =
+            'TracerStudy_' .
+            date('YmdHis') .
+            '.xlsx';
+
         $writer = new Xlsx($spreadsheet);
-        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header("Content-Disposition: attachment; filename=\"$filename\"");
+
+        header(
+            'Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        );
+
+        header(
+            "Content-Disposition: attachment; filename=\"$filename\""
+        );
+
+        header('Cache-Control: max-age=0');
+
         $writer->save('php://output');
+
         exit;
+    }
+
+    // =========================================================
+    // EXPORT SINGLE
+    // =========================================================
+    public function exportSingle($id)
+    {
+        $data = $this->getExportData($id);
+
+        if (!$data) {
+
+            return redirect()
+                ->back()
+                ->with('error', 'Data tidak ditemukan.');
+        }
+
+        $spreadsheet = new Spreadsheet();
+
+        $sheet = $spreadsheet->getActiveSheet();
+
+        $sheet->setTitle('Tracer');
+
+        $dynamicFields = $this->fieldModel
+            ->orderBy('step', 'ASC')
+            ->orderBy('order', 'ASC')
+            ->findAll();
+
+        $row = 1;
+
+        // default fields
+        foreach ($this->defaultFields as $fieldKey => $label) {
+
+            $sheet->setCellValue('A' . $row, $label);
+
+            $sheet->setCellValue(
+                'B' . $row,
+                $data[$fieldKey] ?? ''
+            );
+
+            $row++;
+        }
+
+        // dynamic fields
+        foreach ($dynamicFields as $field) {
+
+            $fieldName = $field['field_name'];
+
+            $sheet->setCellValue(
+                'A' . $row,
+                $field['label']
+            );
+
+            $sheet->setCellValue(
+                'B' . $row,
+                $data[$fieldName] ?? ''
+            );
+
+            $row++;
+        }
+
+        $sheet->getColumnDimension('A')->setAutoSize(true);
+
+        $sheet->getColumnDimension('B')->setAutoSize(true);
+
+        $filename = 'Tracer_' . time() . '.xlsx';
+
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+
+        header("Content-Disposition: attachment; filename=\"$filename\"");
+
+        $writer->save('php://output');
+
+        exit;
+    }
+
+    // =========================================================
+    // SHARED EXPORT QUERY
+    // =========================================================
+    protected function getExportData($id = null)
+    {
+        $builder = $this->tracerModel
+            ->select('
+                tracer_study.*,
+                alumni.nama,
+                alumni.nim,
+                prodi.nama_prodi,
+                prodi.jenjang
+            ')
+            ->join('alumni', 'alumni.id = tracer_study.alumni_id', 'left')
+            ->join('prodi', 'prodi.kode_prodi = alumni.program_studi', 'left');
+
+        if ($id !== null) {
+
+            return $builder
+                ->where('tracer_study.id', $id)
+                ->first();
+        }
+
+        return $builder
+            ->orderBy('tracer_study.created_at', 'DESC')
+            ->findAll();
+    }
+
+    public function requestPengguna($id)
+    {
+        $tracer = $this->tracerModel
+            ->select('
+            tracer_study.*,
+            alumni.nama,
+            alumni.email
+        ')
+            ->join(
+                'alumni',
+                'alumni.id = tracer_study.alumni_id',
+                'left'
+            )
+            ->where('tracer_study.id', $id)
+            ->first();
+
+        if (!$tracer) {
+
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Data tracer tidak ditemukan.'
+                );
+        }
+
+        // =====================================================
+        // VALIDASI STATUS PEKERJAAN
+        // =====================================================
+
+        if (
+            empty($tracer['institusi_bekerja'])
+        ) {
+
+            return redirect()
+                ->back()
+                ->with(
+                    'error',
+                    'Institusi bekerja alumni belum diisi.'
+                );
+        }
+
+        // =====================================================
+        // GENERATE TOKEN
+        // =====================================================
+
+        $token = bin2hex(random_bytes(32));
+
+        $requestModel = new PenggunaRequestModel();
+
+        $requestModel->insert([
+
+            'alumni_id' => $tracer['alumni_id'],
+
+            'nama_perusahaan' =>
+            $tracer['institusi_bekerja'],
+
+            'alamat_perusahaan' =>
+            $tracer['alamat_perusahaan'] ?? null,
+
+            'token' => $token,
+
+            'expired_at' => date(
+                'Y-m-d H:i:s',
+                strtotime('+30 days')
+            ),
+        ]);
+
+        $link = base_url(
+            'kuesioner/pengguna/' . $token
+        );
+
+        return redirect()
+            ->back()
+            ->with(
+                'success',
+                'Link kuesioner pengguna berhasil dibuat: '
+                    . $link
+            );
     }
 }
